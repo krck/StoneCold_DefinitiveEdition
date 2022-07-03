@@ -2,10 +2,23 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "BUILD with Make",
-			"detail": "Run the Makefile script via mingw and create the .dlls and .exe based on Make",
+			"label": "BUILD DEBUG (CMake + Make)",
+			"detail": "Run CMake with DEBUG settings and Make the new .exe in the DEBUG folder",
 			"type": "shell",
-			"command": "mingw32-make",
+			"command": "cmake -G 'MinGW Makefiles' -B build/Debug -DCMAKE_BUILD_TYPE=Debug ; echo '' ; mingw32-make -C build/Debug",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "BUILD RELEASE (CMake + Make)",
+			"detail": "Run CMake with RELEASE settings and Make the new .exe in the RELEASE folder",
+			"type": "shell",
+			"command": "cmake -G 'MinGW Makefiles' -B build/Release -DCMAKE_BUILD_TYPE=Release ; echo '' ; mingw32-make -C build/Release",
 			"problemMatcher": [
 				"$gcc"
 			],

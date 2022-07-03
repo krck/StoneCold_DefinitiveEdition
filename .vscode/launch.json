@@ -5,7 +5,7 @@
         "name": "DEBUG (gdb) launch",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}\\x64\\bin\\stone_cold.exe",
+        "program": "${workspaceFolder}\\build\\Debug\\x64\\bin\\stone_cold.exe",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
@@ -20,7 +20,7 @@
             "ignoreFailures": true
           }
         ],
-        "preLaunchTask": "BUILD with Make"
+        "preLaunchTask": "BUILD DEBUG (CMake + Make)"
       }
     ]
   }

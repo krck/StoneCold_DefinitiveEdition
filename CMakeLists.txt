@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Set Compiler and C++ language 
-set(CMAKE_C_COMPILER clang)
-set(CMAKE_C_COMPILER_FORCED TRUE)
-set(CMAKE_CXX_COMPILER clang++)
-set(CMAKE_CXX_COMPILER_FORCED TRUE)
 set(CMAKE_CXX_STANDARD 17)
+add_compile_options(
+  "-Wall" "-Wpedantic" "-Wextra" "-fexceptions"
+  "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>"
+)
 
 # Define Project Name (${PROJECT_NAME} variable)
 project(stone_cold)
