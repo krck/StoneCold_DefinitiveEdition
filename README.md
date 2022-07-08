@@ -6,7 +6,7 @@ StoneCold (2D Game and Engine)
 2. [Game Design Document](#gdd)
 3. [Technical Description](#technical)
 4. [Copyright and Attribution Notices](#copyr)
-5. [Workitems](#work)
+5. [Work Items](#work)
 6. [Development Setup](#devsetup)
 
 <a name="about"/>
@@ -29,24 +29,23 @@ The main character is a dwarf called Henry and lives in the small village Boulde
 
 ### 2.3 Progression
 
-The player starts out in a town-hub, to which he can return to at any moment and progresses through a series of zones (grasslands, highlands, desert, arctic, castles, ...). Each zone has 5 randomly generated levels and ends with a boss fight. Each lexvel spawns a constant number of different enemies, increasing in difficulty and amount. The goal is to survive these waves and destroy all corrupted comet fragments on the map. Once all zones are traversed Henry reaches the biggest of the raw comet-fragments and fights the final boss, to cleanse the lands for good.
+The player starts out in a town-hub, to which he will return to after every level. Here the player can change class and respec freely. The player progresses through a series of zones (grasslands, highlands, desert, arctic, castles, ...). Each zone has 5 randomly generated levels and ends with a boss fight. Each level spawns a constant number of different enemies, increasing in difficulty and amount. The goal is to survive these waves and destroy all corrupted comet fragments on the map. Once all zones are traversed Henry reaches the biggest of the raw comet-fragments and fights the final boss, to cleanse the lands for good.
 
-After that an "endless-mode" will be unlocked in town, to level/quest/grind further.
+After that an "endless-mode" will be unlocked in town, to level and grind further.
 
 ### 2.4 Gameplay and User Skills
 
-- Keyboard / Controller input
-- Navigating different map types and dungeons
-- Long and short-term resource management
+- Keyboard and Mouse input
+- Navigating different map types and finding fragments
+- Long and short-term resource management and the fight against RNG
 - Depth based on actuals "builds" and "combos"
 
 ### 2.5 Game Mechanics
 
-- Items and Powerups
 - 4 Different classes (Berserker, Crusader, Battle Mage and Gunslinger)
 - RNG Powerups/Pickups in form of Ore-Fragments to flat increase Player Power (Lost on Death or finished Level)
-- Stat and skill management - Skill Tree for each class (Kept after Death or finished Level)
-- Special Moves (on cooldown)
+- Stat and skill management on Levelup - Skill Tree for each class (Kept after Death or finished Level)
+- Special Skills (on cooldown)
 - Healing potion (on cooldown)
 
 ### 2.6 Progression, Challenge and Losing
@@ -58,7 +57,7 @@ If all health is lost, the level will be reset and has to be started from the be
 
 ### 2.7 Art Style and Music
 
-2d Pixel-Art using the dawnbringer color palette. Most sprites are aimed to be 32x32 (pixels in image) and then displayed with a three-times scaling 96x96 (pixels on screen). Some are hand drawn but most of the characters, enemies, etc. will be open source artworks by various artists (see below).
+2D Pixel-Art using the dawnbringer color palette. Most sprites are aimed to be 32x32 (pixels in image) and then displayed with a three-times scaling 96x96 (pixels on screen). Some are hand drawn but most of the characters, enemies, etc. will be open source artworks by various artists (see below).
 
 <a name="technical"/>
 
@@ -68,6 +67,7 @@ If all health is lost, the level will be reset and has to be started from the be
 
 - C++ 17 (CMake, VS Code)
 - [SFML 2.5.1](https://www.sfml-dev.org/) : Cross-platform Graphics and IO library
+- [ini parser](https://github.com/SSARCandy/ini-cpp) : Simple .ini file parser by Andy Hsu (SSARCandy)
 - More dependencies should be avoided at all cost
 
 ### 3.2 Architecture and Code Structure
@@ -99,7 +99,7 @@ Some of the Textures are hand drawn (thanks MS Paint and Gimp) but all the nice 
 
 <a name="work"/>
 
-# 5. Workitems
+# 5. Work Items
 
 ### 5.1 Current tasks
 
@@ -130,42 +130,42 @@ Some of the Textures are hand drawn (thanks MS Paint and Gimp) but all the nice 
 ### 6.1 BASIC SETUP with VS Code (on Windows)
 
 Install VS Code
-    - Add the "C++ Extension Package" (for IntelliSense, CMake tools, Better Syntax, Themes, etc.)
+- Add the "C++ Extension Package" (for IntelliSense, CMake tools, Better Syntax, Themes, etc.)
 
-Install "git" (https://git-scm.com/download/win)
-    - Optional: Install a "git GUI Client" - GitKraken would be my recommendation
+Install [git](https://git-scm.com/download/win)
+- Optional: Install a "git GUI Client" - GitKraken would be my recommendation
 
-Install VS Build Tools (https://visualstudio.microsoft.com/de/downloads/)
-    - Scroll down on the WebPage and select "Tools for Visual Studio 2022" -> "Buildtools for Visual Studio 2022" -> "Download"
-    - On installation select "C++ Desktop" and from the right side-bar also add CMake and Clang for Windows
-    - Alternative: Install CMake and LLVM manually, but "C++ Desktop" is mandatory
+Install the [VS Build Tools](https://visualstudio.microsoft.com/de/downloads/)
+- Scroll down on the WebPage and select "Tools for Visual Studio 2022" -> "Buildtools for Visual Studio 2022" -> "Download"
+- On installation select "C++ Desktop" and from the right side-bar also add CMake and Clang for Windows
+- Alternative: Install CMake and LLVM manually, but "C++ Desktop" is mandatory
 
-Install MinGw (https://www.msys2.org/) and follow this tutorial (https://code.visualstudio.com/docs/cpp/config-mingw)
-    - Update package database: $pacman -Syu
-    - Start MSYS2 MSYS again and run the same command again to finish the installation
-    - Install the full GCC and GDB toolchain: $pacman -S --needed base-devel mingw-w64-x86_64-toolchain
+Install [MinGw](https://www.msys2.org/) and follow this [tutorial](https://code.visualstudio.com/docs/cpp/config-mingw)
+- Update package database: $pacman -Syu
+- Start MSYS2 MSYS again and run the same command again to finish the installation
+- Install the full GCC and GDB toolchain: $pacman -S --needed base-devel mingw-w64-x86_64-toolchain
 
 Start Menu Search: "Edit environment variables" and open the program
-    - Select "Path" and click "Edit..."
-    - Select "New" and add: "C:\msys64\mingw64\bin" (if installed at the default location)
-    - Select "New" and add: "C:\Program Files\Git\bin" (if installed at the default location)
-    - Select "New" and add: "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\bin" (if installed at the default location)
-    - Select "New" and add: "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
-    - Select "Ok" to save the env paths
+- Select "Path" and click "Edit..."
+- Select "New" and add: "C:\msys64\mingw64\bin" (if installed at the default location)
+- Select "New" and add: "C:\Program Files\Git\bin" (if installed at the default location)
+- Select "New" and add: "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\bin" (if installed at the default location)
+- Select "New" and add: "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
+- Select "Ok" to save the env paths
 
 ### 6.2 Test the Installation
 
 First open terminal and enter: "git", "g++", "clang++", "gdb", "cmake", ... All programs should be available now in any console. Then test a simple "Hello World"
-    - Write C++ "Hello World" main.cpp, write basic "CMakeLists.txt"
-    - Call CMake and create "MinGW Makefiles": $cmake -G "MinGW Makefiles"
-    - Call Make to create the exe: $mingw32-make
-    - Test the exe: $ .\exe-name.exe
+- Write C++ "Hello World" main.cpp, write basic "CMakeLists.txt"
+- Call CMake and create "MinGW Makefiles": $cmake -G "MinGW Makefiles"
+- Call Make to create the exe: $mingw32-make
+- Test the exe: $ .\exe-name.exe
 
 ### 6.3 Setup VS Code Tasks and Launch
 
 Add a VS Code "Task" .json file to configure the DEBUG and RELEASE builds.
 Example task below, to execute CMake in the DEBUG folder and then run Make to create the DEBUG .exe
-    - "label": "BUILD DEBUG (CMake + Make)",
-	- "type": "shell",
-	- "command": "cmake -G 'MinGW Makefiles' -B build/Debug -DCMAKE_BUILD_TYPE=Debug ; echo '' ; mingw32-make -C build/Debug",
-	- "problemMatcher": ["$gcc"]
+- "label": "BUILD DEBUG (CMake + Make)",
+- "type": "shell",
+- "command": "cmake -G 'MinGW Makefiles' -B build/Debug -DCMAKE_BUILD_TYPE=Debug ; echo '' ; mingw32-make -C build/Debug",
+- "problemMatcher": ["$gcc"]
