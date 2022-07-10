@@ -8,11 +8,11 @@
 #include <SFML/Graphics.hpp>
 #include "Types.hpp"
 #include "Exception.hpp"
-#include "SettingsManager.hpp"
+#include "AssetManager.hpp"
 
 namespace StoneCold::Core {
 
-using namespace StoneCold::Resources;
+using namespace StoneCold::Assets;
 
 class SfmlManager {
 public:
@@ -20,7 +20,7 @@ public:
 	SfmlManager(const SfmlManager&) = delete;
 	SfmlManager& operator=(const SfmlManager&) = delete;
 
-	bool Initialize(const SettingsManager& settings);
+	bool Initialize(const AssetManager& assets);
 	inline sf::RenderWindow* GetWindow() { return _window.get(); }
 
 	~SfmlManager() = default;

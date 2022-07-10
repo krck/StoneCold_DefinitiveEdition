@@ -27,11 +27,18 @@ public:
 		for (const auto& entityId : _entities) {
 			auto& i = inputComponents[entityId];
 
-			// Read all the relevant Key States into the input components
-			i.KeyStates[sf::Keyboard::A] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::A);
-			i.KeyStates[sf::Keyboard::D] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::D);
-			i.KeyStates[sf::Keyboard::W] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::W);
-			i.KeyStates[sf::Keyboard::S] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::S);
+			// Movement related Keys
+			i.KeyStates[sf::Keyboard::A] 		= sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+			i.KeyStates[sf::Keyboard::D] 		= sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+			i.KeyStates[sf::Keyboard::W] 		= sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+			i.KeyStates[sf::Keyboard::S] 		= sf::Keyboard::isKeyPressed(sf::Keyboard::S);
+			i.KeyStates[sf::Keyboard::LShift] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
+			i.KeyStates[sf::Keyboard::Space] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
+			// Action related Keys
+			i.KeyStates[sf::Keyboard::Num1] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::Num1);
+			i.KeyStates[sf::Keyboard::Num2] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::Num2);
+			i.KeyStates[sf::Keyboard::Num3] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::Num3);
+			i.KeyStates[sf::Keyboard::Num4] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::Num4);
 		}
 	}
 

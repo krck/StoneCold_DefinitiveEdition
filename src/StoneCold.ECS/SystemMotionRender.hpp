@@ -29,9 +29,14 @@ public:
 			auto& s = spriteComponents[entityId];
 			auto& t = transformComponents[entityId];
 
+			// Scale and (based on movement direction) Flip the Sprite
+			s.FlipSprite = (t.Velocity.x == 0 ? s.FlipSprite : (t.Velocity.x < 0 ? -1 : 1));
+			s.Sprite->setScale({ (s.FlipSprite * t.Scale), (1.f * t.Scale) });
+
 			// Transform and draw the SFML Sprite
-			s.Sprite.move(t.Velocity);
-			renderTarget->draw(s.Sprite);
+			s.Sprite->move(t.Velocity);
+			s.Sprite->setTextureRect(s.TextureRect);
+			renderTarget->draw(*s.Sprite);
 		}
 	}
 

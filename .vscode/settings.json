@@ -72,6 +72,16 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "fstream": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "mutex": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp",
+        "unordered_set": "cpp",
+        "any": "cpp",
+        "codecvt": "cpp",
+        "numeric": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "valarray": "cpp"
     }
 }

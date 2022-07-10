@@ -9,14 +9,14 @@
 #include "Enums.hpp"
 // Managers
 #include "SfmlManager.hpp"
-#include "SettingsManager.hpp"
+#include "AssetManager.hpp"
 // Scenes
 #include "GamePlayScene.hpp"
 
 namespace StoneCold::Core {
 
+using namespace StoneCold::Assets;
 using namespace StoneCold::Scenes;
-using namespace StoneCold::Resources;
 
 //
 // This is the central Game class
@@ -64,7 +64,7 @@ private:
 	sf::RenderWindow* _window;
 	// Managers
 	SfmlManager _sfml;
-	SettingsManager _settingsManager;
+	AssetManager _assetManager;
 	// Scenes
 	std::stack<Scene*> _sceneStack;
 	std::unordered_map<SceneType, std::shared_ptr<Scene>> _scenes;

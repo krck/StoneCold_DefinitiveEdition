@@ -13,7 +13,7 @@ StoneCold (2D Game and Engine)
 
 # 1. About
 
-Another one. Lost count of all the 2D/3D SDL2, SFML or "pure" OpenGL based Game and Engine Projects i started. But maybe this one is different ... may this one gets finished. lol.
+Another one. Next half-finished game project. This time more portable (VS Code + CMake) and based on this great [youtube course](https://www.youtube.com/watch?v=LpEdZbUdDe4&list=PL_xRyXins848jkwC9Coy7B4N5XTOnQZzz) by Dave Churchill. This Course is also the reason why this game project moves from SDL2 to SFML, from 3D back to 2D and from implementing everything in raw OpenGL to relying on a library more.
 
 <a name="gdd"/>
 
@@ -21,7 +21,7 @@ Another one. Lost count of all the 2D/3D SDL2, SFML or "pure" OpenGL based Game 
 
 ### 2.1 Project Description
  
-StoneCold will be a Buzzword hell. Its a 2D, top-down, rouge-like, tile-based, bullet-hell RPG and comes with its own SFML based Engine. The concept is heavily inspired by games like Vampire Survivors (Gameplay), Diablo 2 (RPG Elements), Nuclear Throne (Map generation) and many more.
+StoneCold will be a 2D pixel-art, top-down, rouge-lite, tile-based, buzzword-driven, bullet-hell RPG and comes with an SFML based Engine. The concept is heavily inspired by games like Vampire Survivors (Gameplay), Diablo 2 (RPG Elements), Nuclear Throne (Map generation) and many more.
 
 ### 2.2 Story, Characters and Theme
 
@@ -133,19 +133,23 @@ Install VS Code
 - Add the "C++ Extension Package" (for IntelliSense, CMake tools, Better Syntax, Themes, etc.)
 
 Install [git](https://git-scm.com/download/win)
+
 - Optional: Install a "git GUI Client" - GitKraken would be my recommendation
 
 Install the [VS Build Tools](https://visualstudio.microsoft.com/de/downloads/)
+
 - Scroll down on the WebPage and select "Tools for Visual Studio 2022" -> "Buildtools for Visual Studio 2022" -> "Download"
 - On installation select "C++ Desktop" and from the right side-bar also add CMake and Clang for Windows
 - Alternative: Install CMake and LLVM manually, but "C++ Desktop" is mandatory
 
 Install [MinGw](https://www.msys2.org/) and follow this [tutorial](https://code.visualstudio.com/docs/cpp/config-mingw)
+
 - Update package database: $pacman -Syu
 - Start MSYS2 MSYS again and run the same command again to finish the installation
 - Install the full GCC and GDB toolchain: $pacman -S --needed base-devel mingw-w64-x86_64-toolchain
 
 Start Menu Search: "Edit environment variables" and open the program
+
 - Select "Path" and click "Edit..."
 - Select "New" and add: "C:\msys64\mingw64\bin" (if installed at the default location)
 - Select "New" and add: "C:\Program Files\Git\bin" (if installed at the default location)
@@ -156,6 +160,7 @@ Start Menu Search: "Edit environment variables" and open the program
 ### 6.2 Test the Installation
 
 First open terminal and enter: "git", "g++", "clang++", "gdb", "cmake", ... All programs should be available now in any console. Then test a simple "Hello World"
+
 - Write C++ "Hello World" main.cpp, write basic "CMakeLists.txt"
 - Call CMake and create "MinGW Makefiles": $cmake -G "MinGW Makefiles"
 - Call Make to create the exe: $mingw32-make
@@ -165,6 +170,7 @@ First open terminal and enter: "git", "g++", "clang++", "gdb", "cmake", ... All 
 
 Add a VS Code "Task" .json file to configure the DEBUG and RELEASE builds.
 Example task below, to execute CMake in the DEBUG folder and then run Make to create the DEBUG .exe
+
 - "label": "BUILD DEBUG (CMake + Make)",
 - "type": "shell",
 - "command": "cmake -G 'MinGW Makefiles' -B build/Debug -DCMAKE_BUILD_TYPE=Debug ; echo '' ; mingw32-make -C build/Debug",

@@ -2,11 +2,12 @@
 #include "GameCore.hpp"
 
 using namespace StoneCold::Core;
-//using namespace StoneCold::Resources;
+using namespace StoneCold::Assets;
+using namespace StoneCold::Scenes;
 
 GameCore::GameCore()
 	: _sfml(SfmlManager())
-	, _settingsManager(SettingsManager())
+	, _assetManager(AssetManager())
 	, _sceneStack(std::stack<Scene*>())
 	, _scenes(std::unordered_map<SceneType, std::shared_ptr<Scene>>()) 
 	{ };
@@ -20,11 +21,11 @@ bool GameCore::Initialize() {
         _basePath = std::filesystem::path(fsPathRaw).parent_path().u8string();
 
 		// Init will create and show the Application Window
-		if(_settingsManager.Initialize(_basePath) && _sfml.Initialize(_settingsManager)) {
+		if(_assetManager.Initialize(_basePath) && _sfml.Initialize(_assetManager)) {
 			// Set the now active render window
 			_window = _sfml.GetWindow();
 
-			AddScene(SceneType::GamePlay, std::make_shared<GamePlayScene>(20000));
+			AddScene(SceneType::GamePlay, std::make_shared<GamePlayScene>(20000, _assetManager));
 			PushScene(SceneType::GamePlay);
 
 

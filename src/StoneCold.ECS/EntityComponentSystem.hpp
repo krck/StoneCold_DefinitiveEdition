@@ -59,14 +59,14 @@ public:
 
 public:
 	template<typename T>
-	void AddComponent(scEntityId entityId, T component) {
+	void AddComponent(scEntityId entityId, T&& component) {
 		// In case the ECS World does not contain a ComponentArray of the specified Type, initialize it first
 		scHash componentHash = GetTypeHash<T>();
 		if(_componentWorld.find(componentHash) == _componentWorld.end())
 			_componentWorld.insert({ componentHash, std::make_shared<EntityComponentArray<T>>(_maxEntities) });
 
 		// Add the Entity (and the component values) to the specific Component Array
-		GetComponentArray<T>()->insert(entityId, component);
+		GetComponentArray<T>()->insert(entityId, std::move(component));
 		// Add the Component Flag to the mask (OR bitmask with the current value)
 		_entityComponents[entityId] |= ComponentMasks[GetTypeHash<T>()];
 		UpdateSystems(entityId, _entityComponents[entityId]);

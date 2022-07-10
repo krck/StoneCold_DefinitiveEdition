@@ -5,19 +5,22 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include "Types.hpp"
+#include "AssetManager.hpp"
 #include "EntityComponentSystem.hpp"
 
 namespace StoneCold::Scenes {
 
-using namespace StoneCold::Core;
 using namespace StoneCold::ECS;
+using namespace StoneCold::Core;
+using namespace StoneCold::Assets;
 
 //
 // Scene Interface
 //
 class Scene  {
 public:
-	Scene(scUint32 maxEntities) : _ecs(EntityComponentSystem(maxEntities)) { }
+	Scene(scUint32 maxEntities, AssetManager& assetManager) 
+		: _ecs(EntityComponentSystem(maxEntities)), _assetManager(assetManager) { }
 
 	inline EntityComponentSystem* GetECS() { return &_ecs; }
 
@@ -36,6 +39,7 @@ public:
 protected:
 	bool _isActive;
 	EntityComponentSystem _ecs;
+	AssetManager& _assetManager;
 };
 
 }

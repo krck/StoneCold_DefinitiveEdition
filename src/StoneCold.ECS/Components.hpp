@@ -8,10 +8,12 @@
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 #include "Types.hpp"
+#include "AssetSpriteAnimated.hpp"
 
 namespace StoneCold::ECS {
 
 using namespace StoneCold::Core;
+using namespace StoneCold::Assets;
 
 struct CInput {
 	bool KeyStates[256];
@@ -25,10 +27,25 @@ struct CTransform {
 	float Scale;
 };
 
+struct CStaticPosition {
+	sf::Vector2f PositionAbs;
+};
+
 struct CSprite {
-	sf::Texture Texture;
-	sf::Sprite Sprite;
+	scSptr<sf::Sprite> Sprite;
+	sf::IntRect TextureRect;
 	sf::Color ColorMod;
+	float FlipSprite;
+};
+
+struct CAnimation {
+	scSptr<std::unordered_map<std::string, AssetAnimation>> Animations;
+	sf::Vector2i AnimationFrameSize;
+	std::string DefaultAnimation;
+	std::string CurrentAnimation;
+	scUint64 AnimationLockFrame;
+	scUint64 CurrentFrame;
+	scUint16 CurrentIndex;
 };
 
 struct CCollision {

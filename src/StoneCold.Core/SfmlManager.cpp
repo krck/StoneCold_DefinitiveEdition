@@ -2,22 +2,22 @@
 #include "SfmlManager.hpp"
 
 using namespace StoneCold::Core;
-using namespace StoneCold::Resources;
 
 //
 // Initializes the SDL Ressources and 
 // creats/show the application Window
 //
-bool SfmlManager::Initialize(const SettingsManager& settings) {
+bool SfmlManager::Initialize(const AssetManager& assets) {
 	try {
 		// Load these Settings via .json input
-		auto windowName = settings.Get("window", "window_name");
-		auto windowWidth = settings.GetInt("window", "window_width");
-		auto windowHeight = settings.GetInt("window", "window_height");
-		auto windowStyle = (settings.Get("window", "window_style") == "Resize" ? sf::Style::Resize : sf::Style::Default);
-		auto vSyncEnabled = settings.GetBool("window", "window_vsync");
-		auto maxFPS = settings.GetInt("window", "window_max_fps");
-		auto pixelDepth = settings.GetInt("window", "window_pixel_depth");
+		const nlohmann::json settings = assets.GetSettingsJson();
+		auto windowName = 	settings["window"]["name"].get<std::string>();
+		auto windowWidth = 	settings["window"]["width"].get<int>();
+		auto windowHeight = settings["window"]["height"].get<int>();
+		auto windowStyle = (settings["window"]["style"].get<std::string>() == "Resize" ? sf::Style::Resize : sf::Style::Default);
+		auto vSyncEnabled = settings["window"]["vSync"].get<bool>();
+		auto maxFPS = 		settings["window"]["maxFps"].get<int>();
+		auto pixelDepth = 	settings["window"]["pixelDepth"].get<int>();
 
 		// Create the Window
 		_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(sf::Vector2u(windowWidth, windowHeight), pixelDepth), windowName, windowStyle);
