@@ -1,6 +1,6 @@
 
-#ifndef STONECOLD_ECS_SYSTEMMOTIONRENDER_H
-#define STONECOLD_ECS_SYSTEMMOTIONRENDER_H
+#ifndef STONECOLD_ECS_SYSTEMSTATICRENDER_H
+#define STONECOLD_ECS_SYSTEMSTATICRENDER_H
 
 #include "System.hpp"
 #include "Components.hpp"
@@ -8,22 +8,22 @@
 
 namespace StoneCold::ECS {
 
-class SystemMotionRender : public System {
+class SystemStaticRender : public System {
 public:
 	//
 	// Hardcoded System Component-Mask: 
 	// Only Entities with a Transformation and Velocity component will be updated with this System
 	//
-	SystemMotionRender(EntityComponentSystem& ecs)
-		: System((GetComponentMask<CSprite>() | GetComponentMask<CTransform>()))
+	SystemStaticRender(EntityComponentSystem& ecs)
+		: System((GetComponentMask<CSprite>() | GetComponentMask<CStaticPosition>()))
 		, _ecs(ecs) { }
 
-	SystemMotionRender(const SystemMotionRender&) = delete;
-	SystemMotionRender& operator=(const SystemMotionRender&) = delete;
+	SystemStaticRender(const SystemStaticRender&) = delete;
+	SystemStaticRender& operator=(const SystemStaticRender&) = delete;
 
 	virtual void Render(sf::RenderTarget* renderTarget, sf::View* camera) override {
 		auto& spriteComponents = *_ecs.GetComponentArray<CSprite>();
-		auto& transformComponents = *_ecs.GetComponentArray<CTransform>();
+		auto& staticComponents = *_ecs.GetComponentArray<CStaticPosition>();
 
 		// Get the camera bounds to draw only Sprites that are in the current view
 		const auto& camCenter = camera->getCenter();
@@ -32,12 +32,11 @@ public:
 
 		for (const auto& entityId : _entities) {
 			auto& s = spriteComponents[entityId];
-			auto& t = transformComponents[entityId];
+			auto& p = staticComponents[entityId];
 
-			// Transform (Scale, Flip and Move) the Sprite
-			s.FlipSprite = (t.Velocity.x == 0 ? s.FlipSprite : (t.Velocity.x < 0 ? -1 : 1));
-			s.Sprite->setScale({ (s.FlipSprite * t.Scale), (1.f * t.Scale) });
-			s.Sprite->move(t.Velocity);
+			// Scale and (based on movement direction) Flip the Sprite
+			s.Sprite->setScale({ (s.FlipSprite * p.Scale), (1.f * p.Scale) });
+			s.Sprite->setPosition(p.PositionAbs);
 
 			// Draw Sprite if visible, based on the lastet transformation
 			if(cameraRect.findIntersection(s.Sprite->getGlobalBounds())) {

@@ -71,7 +71,7 @@ enum class AiAction {
 // MapTiles used by the Random Map Generator
 // These TileTypes will be mapped to a part of the Level-Texture
 //
-enum class MapTileTypes {
+enum class MapTileType {
 	Placeholder,
 	Portal,
 

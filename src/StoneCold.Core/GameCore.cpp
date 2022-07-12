@@ -24,6 +24,7 @@ bool GameCore::Initialize() {
 		if(_assetManager.Initialize(_basePath) && _sfml.Initialize(_assetManager)) {
 			// Set the now active render window
 			_window = _sfml.GetWindow();
+			_playerCamera = _sfml.GetPlayerView();
 
 			AddScene(SceneType::GamePlay, std::make_shared<GamePlayScene>(20000, _assetManager));
 			PushScene(SceneType::GamePlay);
@@ -131,7 +132,7 @@ int GameCore::Run() {
 			if(!_sceneStack.empty()) {
 				_sceneStack.top()->HandleInput();
 				_sceneStack.top()->Update(frameTime); 
-				_sceneStack.top()->Render(_window);
+				_sceneStack.top()->Render(_window, _playerCamera);
 			}
         	_window->display();
 

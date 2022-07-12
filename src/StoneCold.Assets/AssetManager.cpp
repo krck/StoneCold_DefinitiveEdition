@@ -24,15 +24,21 @@ bool AssetManager::Initialize(const std::string& basePath) {
 	}
 }
 
-void AssetManager::AddTexture(const std::string& name, const std::string& path) {
+void AssetManager::AddTexture(const std::string& assetName, const std::string& path) {
+	if(_assets.find(assetName) != _assets.end())
+		return;
+
 	sf::Texture tmpTex;
 	if (!tmpTex.loadFromFile(_assetPath + path))
 		throw GameException("Texture could not be loaded: " + path);
 
-	_assets[name] = std::make_shared<AssetTexture>(AssetTexture(name, std::move(tmpTex)));
+	_assets[assetName] = std::make_shared<AssetTexture>(AssetTexture(assetName, std::move(tmpTex)));
 }
 
 void AssetManager::AddSpriteAnimated(const std::string& assetName, const std::string& sprite) {
+	if(_assets.find(assetName) != _assets.end())
+		return;
+
 	auto animationIter = _assetsJson["animatedSprites"].find(sprite);
 	if(animationIter == _assetsJson["animatedSprites"].end())
 		throw GameException("Animation could not be loaded: " + sprite);
@@ -59,6 +65,9 @@ void AssetManager::AddSpriteAnimated(const std::string& assetName, const std::st
 }
 
 void AssetManager::AddSpriteStatic(const std::string& assetName, const std::string& sprite) {
+	if(_assets.find(assetName) != _assets.end())
+		return;
+
 	auto animationIter = _assetsJson["staticSprites"].find(sprite);
 	if(animationIter == _assetsJson["staticSprites"].end())
 		throw GameException("Animation could not be loaded: " + sprite);
@@ -71,6 +80,13 @@ void AssetManager::AddSpriteStatic(const std::string& assetName, const std::stri
 	// Add the Sprite to the cache
 	auto tmpAsset = AssetSpriteStatic(assetName, GetTexture(textureName), frameSize);
 	_assets.insert({ assetName, std::make_shared<AssetSpriteStatic>(tmpAsset) });
+}
+
+void AssetManager::AddSpriteStatic(const std::string& assetName, sf::Texture&& texture, const sf::Vector2i& frameSize) {
+	// Hard overwrite any Sprite/Texture with the same name
+	// (This is mostly going to be used for the Level Map, and that data can be discarted/overwritten as soon as the level ends anyway)
+	_assets[assetName + "_TEX"] = std::make_shared<AssetTexture>(AssetTexture(assetName, std::move(texture)));
+	_assets[assetName] = std::make_shared<AssetSpriteStatic>(AssetSpriteStatic(assetName, GetTexture(assetName + "_TEX"), frameSize));
 }
 
 bool AssetManager::RemoveAsset(const std::string& name) {

@@ -22,7 +22,7 @@ namespace StoneCold::Assets {
 using namespace StoneCold::Core;
 
 //
-// ResorceManager to load and unlaod external Resources from the Filesystem
+// AssetManager to load and unlaod external Resources from the Filesystem
 // - Ensures that only one copy of each unique resource exists
 // - Manages four basic Assets: Textures, Animations, Sounds and Fonts
 // - NO Specific Lifetime checking or Per-Scene-Loading!!
@@ -39,9 +39,10 @@ public:
 	inline const nlohmann::json& GetAssetJson() const { return _assetsJson; }
 	inline const nlohmann::json& GetSettingsJson() const { return _settingsJson; }
 
-	void AddTexture(const std::string& name, const std::string& path);
+	void AddTexture(const std::string& assetName, const std::string& path);
 	void AddSpriteAnimated(const std::string& assetName, const std::string& sprite);
 	void AddSpriteStatic(const std::string& assetName, const std::string& sprite);
+	void AddSpriteStatic(const std::string& assetName, sf::Texture&& texture, const sf::Vector2i& frameSize);
 	// sf::Sound* LoadSound(const std::string& name);
 	// sf::Font* LoadFont(const std::string& name);
 
