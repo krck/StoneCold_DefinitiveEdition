@@ -11,6 +11,7 @@
 #include "SystemInputAnimation.hpp"
 #include "SystemInputTransform.hpp"
 #include "SystemMotionRender.hpp"
+#include "SystemStaticRender.hpp"
 
 namespace StoneCold::Scenes {
 
@@ -29,7 +30,7 @@ public:
 	virtual bool HandleEvent() override;
 	virtual void HandleInput() override;
 	virtual void Update(scUint32 frameTime) override;
-	virtual void Render(sf::RenderTarget* renderTarget) override;
+	virtual void Render(sf::RenderTarget* renderTarget, sf::View* camera) override;
 
 	~GamePlayScene() = default;
 
@@ -49,6 +50,7 @@ private:
 	scSptr<SystemInputAnimation> _systemInputAnimation;
 	scSptr<SystemInputTransform> _systemInputTransform;
 	scSptr<SystemMotionRender> _systemMotionRender;
+	scSptr<SystemStaticRender> _systemStaticRender;
 
 	sf::Sprite _playerSprite;
 };

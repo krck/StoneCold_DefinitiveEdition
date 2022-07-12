@@ -19,8 +19,9 @@ bool SfmlManager::Initialize(const AssetManager& assets) {
 		auto maxFPS = 		settings["window"]["maxFps"].get<int>();
 		auto pixelDepth = 	settings["window"]["pixelDepth"].get<int>();
 
-		// Create the Window
+		// Create the Window and the main View
 		_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(sf::Vector2u(windowWidth, windowHeight), pixelDepth), windowName, windowStyle);
+		_playerView = std::make_unique<sf::View>(sf::FloatRect(sf::Vector2f(0.f, 0.f), sf::Vector2f((float)windowWidth, (float)windowHeight)));
 		_window->setActive(true);
 
 		// Set Framerate OR VSync (They do not go well together. Is one or the other)

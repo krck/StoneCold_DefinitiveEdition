@@ -15,7 +15,7 @@
 namespace StoneCold::Core {
 
 struct GameMap {
-	std::vector<std::vector<MapTileTypes>> TileGrid;
+	std::vector<std::vector<MapTileType>> TileGrid;
 	sf::Vector2i SpawnPoint;
 	sf::Vector2i FinishPoint;
 };
@@ -36,14 +36,14 @@ public:
 	MapManager(const MapManager&) = delete;
 	MapManager& operator=(const MapManager&) = delete;
 
-	scSptr<GameMap> GenerateMap(sf::Vector2i size, float randomDirValue, float randomUpdateValue);
+	scSptr<GameMap> GenerateMap(LevelType levelType, sf::Vector2i size);
 
 	~MapManager() = default;
 
 private:
-	void CreateFloor(std::vector<std::vector<MapTileTypes>>& grid, float chanceWalkerChangeDir, float chanceWalkerUpdate);
-	void CreateWalls(std::vector<std::vector<MapTileTypes>>& grid);
-	std::pair<sf::Vector2i, sf::Vector2i> SetFinalMapTiles(std::vector<std::vector<MapTileTypes>>& grid);
+	void CreateFloor(std::vector<std::vector<MapTileType>>& grid, float chanceWalkerChangeDir, float chanceWalkerUpdate);
+	void CreateWalls(std::vector<std::vector<MapTileType>>& grid);
+	std::pair<sf::Vector2i, sf::Vector2i> SetFinalMapTiles(std::vector<std::vector<MapTileType>>& grid);
 
 	//
 	// Removes one element form a vector at the specified index
@@ -61,38 +61,11 @@ private:
 	// Const map generation settings
 	const int _maxWalkers = 10;
 	const float _percentToFill = 0.35f;
-
-public:
-	//
-	// Map Frames
-	// TileType mapping and "src rect" frames within any of the Map Textures (some need to be flipped as well)
-	//
-	const std::unordered_map<MapTileTypes, std::pair<sf::IntRect, float>> MAP_TILE_FRAMES = 
-		std::unordered_map<MapTileTypes, std::pair<sf::IntRect, float>>({
-		{ MapTileTypes::Wall_Top,				{ { sf::Vector2i(0,0), sf::Vector2i(32,32) },    1.f } },
-		{ MapTileTypes::Corner_Top_Left,		{ { sf::Vector2i(32,0), sf::Vector2i(32,32) },  -1.f } },
-		{ MapTileTypes::Corner_Top_Right,		{ { sf::Vector2i(32,0), sf::Vector2i(32,32) },   1.f } },
-		{ MapTileTypes::Middle_Block_Vertical,	{ { sf::Vector2i(64,0), sf::Vector2i(32,32) },   1.f } },
-		{ MapTileTypes::Endblock_Top,			{ { sf::Vector2i(96,0), sf::Vector2i(32,32) },   1.f } },
-		{ MapTileTypes::Portal,					{ { sf::Vector2i(128,0), sf::Vector2i(32,32) },  1.f } },
-		{ MapTileTypes::Top_Special,			{ { sf::Vector2i(0,32), sf::Vector2i(32,32) },   1.f } },
-		{ MapTileTypes::Wall_Left,				{ { sf::Vector2i(32,32), sf::Vector2i(32,32) },  1.f } },
-		{ MapTileTypes::Wall_Right,				{ { sf::Vector2i(32,32), sf::Vector2i(32,32) }, -1.f } },
-		{ MapTileTypes::Middle_Block_Horizontal,{ { sf::Vector2i(64,32), sf::Vector2i(32,32) },  1.f } },
-		{ MapTileTypes::Endblock_Bottom,		{ { sf::Vector2i(96,32), sf::Vector2i(32,32) },  1.f } },
-		{ MapTileTypes::Floor_Special_3,		{ { sf::Vector2i(128,32), sf::Vector2i(32,32) }, 1.f } },
-		{ MapTileTypes::Wall_Bottom,			{ { sf::Vector2i(0,64), sf::Vector2i(32,32) },   1.f } },
-		{ MapTileTypes::Corner_Bottom_Left,		{ { sf::Vector2i(32,64), sf::Vector2i(32,32) }, -1.f } },
-		{ MapTileTypes::Corner_Bottom_Right,	{ { sf::Vector2i(32,64), sf::Vector2i(32,32) },  1.f } },
-		{ MapTileTypes::Floor_Special_2,		{ { sf::Vector2i(64,64), sf::Vector2i(32,32) },  1.f } },
-		{ MapTileTypes::Endblock_Left,			{ { sf::Vector2i(96,64), sf::Vector2i(32,32) }, -1.f } },
-		{ MapTileTypes::Endblock_Right,			{ { sf::Vector2i(96,64), sf::Vector2i(32,32) },  1.f } },
-		{ MapTileTypes::Top_Default,			{ { sf::Vector2i(128,64), sf::Vector2i(32,32) }, 1.f } },
-		{ MapTileTypes::Floor_Shadow,			{ { sf::Vector2i(0,96), sf::Vector2i(32,32) },   1.f } },
-		{ MapTileTypes::Floor_Special_4,		{ { sf::Vector2i(32,96), sf::Vector2i(32,32) },  1.f } },
-		{ MapTileTypes::Floor_Default,			{ { sf::Vector2i(64,96), sf::Vector2i(32,32) },  1.f } },
-		{ MapTileTypes::Floor_Special_1,		{ { sf::Vector2i(96,96), sf::Vector2i(32,32) },  1.f } }
-	});
+	const std::vector<std::pair<float, float>> mapPatterns = {
+		{ 0.6f, 0.01f }, // 1) ROCKY: Map with few open spaces, very jagged edges and lots of corridors and obstacles
+		{ 0.75f, 0.1f }, // 2) MIXED: Map with bigger open spaces, some jagged edges and few obstacles
+		{ 0.95f, 0.2f }	 // 3) FLAT: Map with one massive, open space, smoothe-ish edges and no corridors/obstacles
+	};
 
 };
 

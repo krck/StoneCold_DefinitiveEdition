@@ -29,6 +29,8 @@ struct CTransform {
 
 struct CStaticPosition {
 	sf::Vector2f PositionAbs;
+	float Angle;
+	float Scale;
 };
 
 struct CSprite {

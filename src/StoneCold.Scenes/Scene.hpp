@@ -34,7 +34,7 @@ public:
 	virtual void HandleInput() = 0;
 	virtual void SimulateUpdate() { }
 	virtual void Update(scUint32 frameTime) = 0;
-	virtual void Render(sf::RenderTarget* renderTarget) = 0;
+	virtual void Render(sf::RenderTarget* renderTarget, sf::View* camera) = 0;
 
 protected:
 	bool _isActive;
