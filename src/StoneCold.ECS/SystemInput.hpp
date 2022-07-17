@@ -6,7 +6,11 @@
 #include "Components.hpp"
 #include "EntityComponentSystem.hpp"
 
+#include <iostream>
+
 namespace StoneCold::ECS {
+
+using namespace StoneCold::Scenes;
 
 class SystemInput : public System {
 public:
@@ -21,24 +25,16 @@ public:
 	SystemInput(const SystemInput&) = delete;
 	SystemInput& operator=(const SystemInput&) = delete;
 
-	virtual void HandleInput() override {
+	virtual void HandleInput(const std::vector<SceneAction>& actions) override {
 		auto& inputComponents = *_ecs.GetComponentArray<CInput>();
 
 		for (const auto& entityId : _entities) {
 			auto& i = inputComponents[entityId];
-
-			// Movement related Keys
-			i.KeyStates[sf::Keyboard::A] 		= sf::Keyboard::isKeyPressed(sf::Keyboard::A);
-			i.KeyStates[sf::Keyboard::D] 		= sf::Keyboard::isKeyPressed(sf::Keyboard::D);
-			i.KeyStates[sf::Keyboard::W] 		= sf::Keyboard::isKeyPressed(sf::Keyboard::W);
-			i.KeyStates[sf::Keyboard::S] 		= sf::Keyboard::isKeyPressed(sf::Keyboard::S);
-			i.KeyStates[sf::Keyboard::LShift] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
-			i.KeyStates[sf::Keyboard::Space] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
-			// Action related Keys
-			i.KeyStates[sf::Keyboard::Num1] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::Num1);
-			i.KeyStates[sf::Keyboard::Num2] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::Num2);
-			i.KeyStates[sf::Keyboard::Num3] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::Num3);
-			i.KeyStates[sf::Keyboard::Num4] 	= sf::Keyboard::isKeyPressed(sf::Keyboard::Num4);
+			
+			// Transform all input actions into a simple lookup by action name
+			for (const auto& a : actions) {
+				i.Actions[a.GetAction()] = a.GetType();
+			}
 		}
 	}
 

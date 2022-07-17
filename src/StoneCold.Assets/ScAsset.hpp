@@ -1,6 +1,6 @@
 
-#ifndef STONECOLD_ASSETS_ASSET_H
-#define STONECOLD_ASSETS_ASSET_H
+#ifndef STONECOLD_ASSETS_SCASSET_H
+#define STONECOLD_ASSETS_SCASSET_H
 
 #include <string>
 #include <SFML/Graphics.hpp>
@@ -10,9 +10,9 @@ namespace StoneCold::Assets {
 
 using namespace StoneCold::Core;
 
-class Asset {
+class ScAsset {
 public:
-	Asset(const std::string& name) : Id(std::hash<std::string>()(name)), Name(name) {}
+	ScAsset(const std::string& name) : Id(std::hash<std::string>()(name)), Name(name) {}
 
 public:
 	const scHash Id;

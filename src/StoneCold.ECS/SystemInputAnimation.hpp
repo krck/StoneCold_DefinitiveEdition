@@ -7,6 +7,8 @@
 
 namespace StoneCold::ECS {
 
+using namespace StoneCold::Scenes;
+
 class SystemInputAnimation : public System {
 public:
 	//
@@ -20,7 +22,7 @@ public:
 	SystemInputAnimation(const SystemInputAnimation&) = delete;
 	SystemInputAnimation& operator=(const SystemInputAnimation&) = delete;
 
-	virtual void HandleInput() override {
+	virtual void HandleInput(const std::vector<SceneAction>&) override {
 		auto& inputComponents = *_ecs.GetComponentArray<CInput>();
 		auto& animationComponents = *_ecs.GetComponentArray<CAnimation>();
 
@@ -32,8 +34,8 @@ public:
 			// 	continue;
 
 			// Check if player is moving
-			auto movingX = ((-1.0f * i.KeyStates[sf::Keyboard::A]) + i.KeyStates[sf::Keyboard::D]);
-			auto movingY = ((-1.0f * i.KeyStates[sf::Keyboard::W]) + i.KeyStates[sf::Keyboard::S]);
+			auto movingX = ((-1.0f * i.ActionStart("ACTN_LEFT")) + i.ActionStart("ACTN_RIGHT"));
+			auto movingY = ((-1.0f * i.ActionStart("ACTN_UP")) + i.ActionStart("ACTN_DOWN"));
 			if (movingX != 0 || movingY != 0)
 				a.CurrentAnimation = "Walk";
 			else //if (movingX == 0 && movingY == 0)
@@ -41,15 +43,15 @@ public:
 
 			a.AnimationLockFrame = a.CurrentFrame;
 
-			if (i.KeyStates[sf::Keyboard::Num1]) {
+			if (i.ActionStart("ACTN_ACTION_PRIMARY")) {
 				a.CurrentAnimation = "ATK_Light";
 				a.AnimationLockFrame = (a.CurrentFrame + (*a.Animations)[a.CurrentAnimation].FrameCount) + 1;
 			}
-			if (i.KeyStates[sf::Keyboard::Num2]) {
+			if (i.ActionStart("ACTN_ACTION_SECONDARY")) {
 				a.CurrentAnimation = "ATK_Heavy";
 				a.AnimationLockFrame = (a.CurrentFrame + (*a.Animations)[a.CurrentAnimation].FrameCount) + 1;
 			}
-			if (i.KeyStates[sf::Keyboard::Num3]) {
+			if (i.ActionStart("ACTN_ACTION_SPECIAL")) {
 				a.CurrentAnimation = "ATK_Special";
 				a.AnimationLockFrame = (a.CurrentFrame + (*a.Animations)[a.CurrentAnimation].FrameCount) + 1;
 			}

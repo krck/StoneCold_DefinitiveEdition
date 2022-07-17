@@ -7,10 +7,12 @@
 #include <algorithm>
 #include <SFML/Graphics.hpp>
 #include "Types.hpp"
+#include "SceneAction.hpp"
 
 namespace StoneCold::ECS {
 
 using namespace StoneCold::Core;
+using namespace StoneCold::Scenes;
 
 //
 // System Interface
@@ -21,7 +23,7 @@ public:
 	System(const System&) = delete;
 	System& operator=(const System&) = delete;
 
-	virtual void HandleInput() { }
+	virtual void HandleInput(const std::vector<SceneAction>&) { }
 	virtual void Update(scUint64) { }
 	virtual void Render(sf::RenderTarget*, sf::View*) { }
 

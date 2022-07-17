@@ -13,9 +13,10 @@
 #include "Enums.hpp"
 #include "Types.hpp"
 #include "Exception.hpp"
-#include "AssetTexture.hpp"
-#include "AssetSpriteAnimated.hpp"
-#include "AssetSpriteStatic.hpp"
+#include "ScAssetFont.hpp"
+#include "ScAssetTexture.hpp"
+#include "ScAssetSpriteAnimated.hpp"
+#include "ScAssetSpriteStatic.hpp"
 
 namespace StoneCold::Assets {
 
@@ -30,27 +31,26 @@ using namespace StoneCold::Core;
 //
 class AssetManager {
 public:
-	AssetManager() : _assets(std::unordered_map<std::string, scSptr<Asset>>()) { }
+	AssetManager() : _assets(std::unordered_map<std::string, scSptr<ScAsset>>()) { }
 	AssetManager(const AssetManager&) = delete;
 	AssetManager& operator=(const AssetManager&) = delete;
 
 	bool Initialize(const std::string& basePath);
 
-	inline const nlohmann::json& GetAssetJson() const { return _assetsJson; }
 	inline const nlohmann::json& GetSettingsJson() const { return _settingsJson; }
 
+	void AddFont(const std::string& assetName, const std::string& path);
 	void AddTexture(const std::string& assetName, const std::string& path);
 	void AddSpriteAnimated(const std::string& assetName, const std::string& sprite);
 	void AddSpriteStatic(const std::string& assetName, const std::string& sprite);
 	void AddSpriteStatic(const std::string& assetName, sf::Texture&& texture, const sf::Vector2i& frameSize);
 	// sf::Sound* LoadSound(const std::string& name);
-	// sf::Font* LoadFont(const std::string& name);
 
-	inline const sf::Texture& GetTexture(const std::string& name) const { return static_cast<AssetTexture*>(_assets.at(name).get())->GetTexture(); }
-	inline AssetSpriteAnimated* GetSpriteAnimated(const std::string& name) { return  static_cast<AssetSpriteAnimated*>(_assets.at(name).get()); }
-	inline AssetSpriteStatic* GetSpriteStatic(const std::string& name) { return  static_cast<AssetSpriteStatic*>(_assets.at(name).get()); }
+	inline const sf::Font& GetFont(const std::string& name) const { return static_cast<ScAssetFont*>(_assets.at(name).get())->GetFont(); }
+	inline const sf::Texture& GetTexture(const std::string& name) const { return static_cast<ScAssetTexture*>(_assets.at(name).get())->GetTexture(); }
+	inline ScAssetSpriteAnimated* GetSpriteAnimated(const std::string& name) { return  static_cast<ScAssetSpriteAnimated*>(_assets.at(name).get()); }
+	inline ScAssetSpriteStatic* GetSpriteStatic(const std::string& name) { return  static_cast<ScAssetSpriteStatic*>(_assets.at(name).get()); }
 	// sf::Sound* GetSound(const std::string& name);
-	// sf::Font* GetFont(const std::string& name);
 
 	bool RemoveAsset(const std::string& name);
 
@@ -60,10 +60,10 @@ private:
 	std::string _assetPath;
 	std::string _configPath;
 	// Asset cache
-	std::unordered_map<std::string, scSptr<Asset>> _assets;
-	std::unordered_map<ResourceLifeTime, std::vector<std::string>> _resouceLifetimes;
+	std::unordered_map<std::string, scSptr<ScAsset>> _assets;
 	// Config files
 	nlohmann::json _assetsJson;
+	nlohmann::json _spritesJson;
 	nlohmann::json _settingsJson;
 };
 

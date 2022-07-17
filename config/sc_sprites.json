@@ -1,0 +1,46 @@
+{
+    "staticSprites": {
+        "Sprite_Grassland": {
+            "textureName": "Texture_Grassland",
+            "frameWidth": 32,
+            "frameHeight": 32
+        },
+        "Sprite_GuiButton": {
+            "textureName": "Texture_GuiButton",
+            "frameWidth": 200,
+            "frameHeight": 50
+        }
+    },
+    "animatedSprites": {
+        "Sprite_Player": { 
+            "textureName": "Texture_Player",
+            "frameWidth": 32,
+            "frameHeight": 32,
+            "defaultAnimation": "Idle",
+            "animations": [
+                { "name": "Idle",           "frameSpeed": 10, "frameCount": 5, "yOffset": 0 },
+                { "name": "Walk",           "frameSpeed": 5, "frameCount": 8, "yOffset": 32 },
+                { "name": "ATK_Heavy",      "frameSpeed": 5, "frameCount": 7, "yOffset": 64 },
+                { "name": "ATK_Light",      "frameSpeed": 5, "frameCount": 6, "yOffset": 96 },
+                { "name": "ATK_Special",    "frameSpeed": 5, "frameCount": 2, "yOffset": 128 },
+                { "name": "Jump",           "frameSpeed": 5, "frameCount": 5, "yOffset": 160 },
+                { "name": "Hit",            "frameSpeed": 5, "frameCount": 4, "yOffset": 192 },
+                { "name": "Dead",           "frameSpeed": 5, "frameCount": 7, "yOffset": 224 }
+            ]
+        },
+        "Sprite_Skeleton": { 
+            "textureName": "Texture_Skeleton",
+            "frameWidth": 32,
+            "frameHeight": 32,
+            "defaultAnimation": "Idle",
+            "animations": [
+                { "name": "Idle",           "frameSpeed": 10, "frameCount": 11, "yOffset": 0 },
+                { "name": "Walk",           "frameSpeed": 5, "frameCount": 13, "yOffset": 32 },
+                { "name": "ATK_Light",      "frameSpeed": 5, "frameCount": 18, "yOffset": 64 },
+                { "name": "Hit",            "frameSpeed": 5, "frameCount": 8,  "yOffset": 96 },
+                { "name": "React",          "frameSpeed": 5, "frameCount": 4,  "yOffset": 128 },
+                { "name": "Dead",           "frameSpeed": 5, "frameCount": 12, "yOffset": 160 }
+            ]
+        }
+    }
+}

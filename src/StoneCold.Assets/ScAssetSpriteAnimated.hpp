@@ -1,12 +1,12 @@
 
-#ifndef STONECOLD_ASSETS_ASSETSPRITEANIMATED_H
-#define STONECOLD_ASSETS_ASSETSPRITEANIMATED_H
+#ifndef STONECOLD_ASSETS_SCASSETSPRITEANIMATED_H
+#define STONECOLD_ASSETS_SCASSETSPRITEANIMATED_H
 
 #include <string>
 #include <unordered_map>
 #include <SFML/Graphics.hpp>
 #include "Types.hpp"
-#include "Assets.hpp"
+#include "ScAsset.hpp"
 
 namespace StoneCold::Assets {
 
@@ -25,11 +25,11 @@ struct AssetAnimation {
 //
 // Sprite Asset with 2D Sprite and all the Animation information
 //
-class AssetSpriteAnimated : public Asset {
+class ScAssetSpriteAnimated : public ScAsset {
 public:
-    AssetSpriteAnimated(const std::string& name, const sf::Texture& texture, const std::vector<AssetAnimation>& animations, 
-                        const std::string& defaultAnimation, const sf::Vector2i& frameSize) 
-                        : Asset(name), _frameSize(frameSize), _defaultAnimation(defaultAnimation) {
+    ScAssetSpriteAnimated(const std::string& name, const sf::Texture& texture, const std::vector<AssetAnimation>& animations, 
+                          const std::string& defaultAnimation, const sf::Vector2i& frameSize) 
+                        : ScAsset(name), _frameSize(frameSize), _defaultAnimation(defaultAnimation) {
         // Create and configure the 2D Sprite
         _sprite = std::make_shared<sf::Sprite>();
         _sprite->setTexture(texture);

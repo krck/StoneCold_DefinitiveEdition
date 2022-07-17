@@ -8,7 +8,7 @@
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 #include "Types.hpp"
-#include "AssetSpriteAnimated.hpp"
+#include "ScAssetSpriteAnimated.hpp"
 
 namespace StoneCold::ECS {
 
@@ -16,7 +16,10 @@ using namespace StoneCold::Core;
 using namespace StoneCold::Assets;
 
 struct CInput {
-	bool KeyStates[256];
+	std::map<std::string, ActionType> Actions = std::map<std::string, ActionType>();
+	// Only logic in Components: Simple lookup-helper for Actions map (Check if contains and if its a specific ActionType)
+	inline bool ActionStart(const std::string& a) const { return (Actions.find(a) != Actions.end() ? (Actions.at(a) == ActionType::Start) : false); }
+	inline bool ActionEnd(const std::string& a) const { return (Actions.find(a) != Actions.end() ? (Actions.at(a) == ActionType::End) : false); }
 };
 
 struct CTransform {
@@ -57,58 +60,6 @@ struct CCollision {
 struct CScore {
 	scInt32 Score;
 };
-
-
-/*
-struct AnimationComponent {
-	const std::unordered_map<std::string, Animation>* Animations;
-	const Animation* CurrentAnimation;
-	uint32 CurrentFrameIndex;
-	uint32 TimeElapsed;
-
-	inline const Animation* GetAnimation(std::string name) {
-		auto anim = &Animations->find(name)->second;
-		// Reset the FrameIndex if the requested FrameCount is lower
-		if (CurrentFrameIndex > anim->FrameCount)
-			CurrentFrameIndex = 0;
-
-		return anim;
-	}
-};
-
-struct AttributeComponentUI {
-	UiElementAttribute UiAttribute;
-};
-
-struct SpriteLayeredComponent {
-	SDL_Texture* TextureBottom;
-	SDL_RendererFlip FlipBottom;
-	SDL_Texture* TextureTop;
-	SDL_RendererFlip FlipTop;
-};
-
-struct VelocityComponent {
-	Vec2 Velocity;
-};
-
-struct ScreenPositionComponent {
-	SDL_Rect SrcRect;
-	SDL_FRect DestRect;
-};
-
-struct ScreenPositionLayeredComponent {
-	SDL_Rect SrcRectBottom;
-	SDL_FRect DestRectBottom;
-	SDL_Rect SrcRectTop;
-	SDL_FRect DestRectTop;
-};
-
-struct EnemyStateComponent {
-	const std::unordered_map<bitMask32, AiAction>* AiActions;
-	bitMask32 AiDecisions;
-};
-
-*/
 
 }
 

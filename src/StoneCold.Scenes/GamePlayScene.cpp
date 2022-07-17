@@ -32,15 +32,23 @@ bool GamePlayScene::Initialize() {
 	return true;
 }
 
-bool GamePlayScene::HandleEvent() {
+bool GamePlayScene::HandleEvent(const sf::Event&) {
 	return true;
 }
 
-void GamePlayScene::HandleInput() {
-	_systemInput->HandleInput();
-	_systemInputAnimation->HandleInput();
-}
+void GamePlayScene::HandleInput(sf::WindowBase*) {
+	_systemInput->HandleInput(_pendingActions);
+	_systemInputAnimation->HandleInput(_pendingActions);
 
+	// ESC to go back to the Main Menu
+	for (const auto& action : _pendingActions) {
+		if(action.GetAction() == "ACTN_ESC" && _sceneEventCallback != nullptr)
+			_sceneEventCallback(SceneEvent::ChangeScene, SceneType::MainMenu);
+	}
+	
+	ClearActions();
+}
+ 
 void GamePlayScene::Update(scUint32 frameTime) {
 	_systemInputTransform->Update(frameTime);
 	_systemAnimation->Update(frameTime);
