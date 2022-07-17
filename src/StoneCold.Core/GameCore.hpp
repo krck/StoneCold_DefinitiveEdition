@@ -4,14 +4,15 @@
 
 #include <stack>
 #include <array>
+#include <functional>
 #include <filesystem>
 #include <windows.h>
 #include "Enums.hpp"
-// Managers
 #include "SfmlManager.hpp"
 #include "AssetManager.hpp"
-// Scenes
+#include "MainMenuScene.hpp"
 #include "GamePlayScene.hpp"
+#include "SceneAction.hpp"
 
 namespace StoneCold::Core {
 
@@ -41,25 +42,19 @@ public:
 	//
 	int Run();
 
+	~GameCore() = default;
+
+private:
 	//
 	// Scene management (creation and destruction) is private
 	// Any Scene handling (swtiching or accessing Scene ptrs) is public
 	//
-private:
 	bool AddScene(SceneType type, std::shared_ptr<Scene>&& scene);
-	bool RemoveScene(SceneType type);
-
-public:
-	void PushScene(SceneType type);
-	void PopScene();
-
-	inline Scene* GetActiveScene() { return _sceneStack.top(); }
-	inline Scene* GetScene(SceneType type) { return _scenes[type].get(); }
-	inline bool HasScene(SceneType type) const { return (_scenes.find(type) != _scenes.end()); }
-
-	~GameCore() = default;
+	void SetSceneActive(SceneType type);
+	void SceneEventCallback(SceneEvent eventType, SceneType eventScene);
 
 private:
+	bool _globalEXIT;
 	std::string _basePath;
 	sf::RenderWindow* _window;
 	sf::View* _playerCamera;
@@ -67,7 +62,8 @@ private:
 	SfmlManager _sfml;
 	AssetManager _assetManager;
 	// Scenes
-	std::stack<Scene*> _sceneStack;
+	Scene* _activeScene;
+	std::unordered_map<ActionMap, std::string> _actionMap;
 	std::unordered_map<SceneType, std::shared_ptr<Scene>> _scenes;
 
 };

@@ -35,8 +35,8 @@ public:
 			// For each keykeyStates contains a value of 1 if pressed and a value of 0 if not pressed
 			// Add negative and positive velocity so the sprite doesn't move if both are pressed at the same time
 			sf::Vector2f tmpVelocity;
-			tmpVelocity.x = ((-1.0f * i.KeyStates[sf::Keyboard::A]) + i.KeyStates[sf::Keyboard::D]);
-			tmpVelocity.y = ((-1.0f * i.KeyStates[sf::Keyboard::W]) + i.KeyStates[sf::Keyboard::S]);
+			tmpVelocity.x = ((-1.0f * i.ActionStart("ACTN_LEFT")) + i.ActionStart("ACTN_RIGHT"));
+			tmpVelocity.y = ((-1.0f * i.ActionStart("ACTN_UP")) + i.ActionStart("ACTN_DOWN"));
 
 			// Normalize the velocity in case of diagonal movement
 			// FIND SOME WAY TO DO THIS WITHOUT IF TO NOT DISTURB THE CACHE, OUR LORD AND SAVIOR

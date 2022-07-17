@@ -27,8 +27,8 @@ public:
 
 	virtual bool Initialize() override;
 
-	virtual bool HandleEvent() override;
-	virtual void HandleInput() override;
+	virtual bool HandleEvent(const sf::Event&) override;
+	virtual void HandleInput(sf::WindowBase*) override;
 	virtual void Update(scUint32 frameTime) override;
 	virtual void Render(sf::RenderTarget* renderTarget, sf::View* camera) override;
 

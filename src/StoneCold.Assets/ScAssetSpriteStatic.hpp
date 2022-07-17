@@ -1,18 +1,18 @@
 
-#ifndef STONECOLD_ASSETS_ASSETSPRITESTATIC_H
-#define STONECOLD_ASSETS_ASSETSPRITESTATIC_H
+#ifndef STONECOLD_ASSETS_SCASSETSPRITESTATIC_H
+#define STONECOLD_ASSETS_SCASSETSPRITESTATIC_H
 
 #include <SFML/Graphics.hpp>
 #include "Types.hpp"
-#include "Assets.hpp"
+#include "ScAsset.hpp"
 
 namespace StoneCold::Assets {
 
 using namespace StoneCold::Core;
 
-class AssetSpriteStatic : public Asset {
+class ScAssetSpriteStatic : public ScAsset {
 public:
-    AssetSpriteStatic(const std::string& name, const sf::Texture& texture, const sf::Vector2i& frameSize) : Asset(name), _frameSize(frameSize) {
+    ScAssetSpriteStatic(const std::string& name, const sf::Texture& texture, const sf::Vector2i& frameSize) : ScAsset(name), _frameSize(frameSize) {
         // Create and configure the 2D Sprite
         _sprite = std::make_shared<sf::Sprite>();
         _sprite->setTexture(texture);
