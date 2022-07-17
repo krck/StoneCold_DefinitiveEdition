@@ -9,6 +9,7 @@
 #include "Types.hpp"
 #include "Exception.hpp"
 #include "AssetManager.hpp"
+#include "ApplicationConfig.hpp"
 
 namespace StoneCold::Core {
 

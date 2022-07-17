@@ -82,6 +82,7 @@
         "numeric": "cpp",
         "ranges": "cpp",
         "span": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "*.in": "cpp"
     }
 }
