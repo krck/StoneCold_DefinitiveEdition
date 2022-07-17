@@ -1,4 +1,8 @@
 {
+    "editor.formatOnSave": false,
+    "C_Cpp.clang_format_style": "file",
+    "clang-format.assumeFilename": "sc.clang-format",
+    "clang-format.language.cpp.enable": true,
     "files.associations": {
         "algorithm": "cpp",
         "array": "cpp",
