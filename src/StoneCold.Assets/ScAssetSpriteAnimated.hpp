@@ -10,7 +10,7 @@
 
 namespace StoneCold::Assets {
 
-using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 //
 // Simple Sturct to hold the singular Animation data (idle, walk, attack, dead, etc.)

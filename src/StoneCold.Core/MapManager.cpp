@@ -2,6 +2,7 @@
 #include "MapManager.hpp"
 
 using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 scSptr<GameMap> MapManager::GenerateMap(LevelType levelType, sf::Vector2i size) {
 	GameMap map;
@@ -29,8 +30,8 @@ scSptr<GameMap> MapManager::GenerateMap(LevelType levelType, sf::Vector2i size) 
 	CreateWalls(map.TileGrid);
 	auto mapPoints = SetFinalMapTiles(map.TileGrid);
 
-	map.SpawnPoint = mapPoints.first;
-	map.FinishPoint = mapPoints.second;
+	map.SpawnPoint = sf::Vector2f(mapPoints.first);
+	map.FinishPoint = sf::Vector2f(mapPoints.second);
 
 	return std::make_shared<GameMap>(map);
 }

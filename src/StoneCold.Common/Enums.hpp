@@ -1,8 +1,8 @@
 
-#ifndef STONECOLD_CORE_ENUMS_H
-#define STONECOLD_CORE_ENUMS_H
+#ifndef STONECOLD_COMMON_ENUMS_H
+#define STONECOLD_COMMON_ENUMS_H
 
-namespace StoneCold::Core {
+namespace StoneCold::Common {
 
 enum class SceneType {
 	None,

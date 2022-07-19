@@ -1,12 +1,12 @@
 
-#ifndef STONECOLD_CORE_EXCEPTION_H
-#define STONECOLD_CORE_EXCEPTION_H
+#ifndef STONECOLD_COMMON_EXCEPTION_H
+#define STONECOLD_COMMON_EXCEPTION_H
 
 #include <exception>
 #include <sstream>
 #include <string>
 
-namespace StoneCold::Core {
+namespace StoneCold::Common {
 
 class Exception : public std::exception {
 public:

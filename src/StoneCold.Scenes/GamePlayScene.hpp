@@ -17,6 +17,7 @@ namespace StoneCold::Scenes {
 
 using namespace StoneCold::ECS;
 using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 using namespace StoneCold::Assets;
 
 class GamePlayScene : public Scene {

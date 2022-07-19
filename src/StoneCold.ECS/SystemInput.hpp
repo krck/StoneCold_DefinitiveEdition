@@ -6,8 +6,6 @@
 #include "Components.hpp"
 #include "EntityComponentSystem.hpp"
 
-#include <iostream>
-
 namespace StoneCold::ECS {
 
 using namespace StoneCold::Scenes;

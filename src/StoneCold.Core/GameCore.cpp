@@ -2,6 +2,7 @@
 #include "GameCore.hpp"
 
 using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 using namespace StoneCold::Assets;
 using namespace StoneCold::Scenes;
 

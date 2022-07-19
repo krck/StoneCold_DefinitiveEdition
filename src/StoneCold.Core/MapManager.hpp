@@ -14,10 +14,12 @@
 
 namespace StoneCold::Core {
 
+using namespace StoneCold::Common;
+
 struct GameMap {
 	std::vector<std::vector<MapTileType>> TileGrid;
-	sf::Vector2i SpawnPoint;
-	sf::Vector2i FinishPoint;
+	sf::Vector2f SpawnPoint;
+	sf::Vector2f FinishPoint;
 };
 
 //

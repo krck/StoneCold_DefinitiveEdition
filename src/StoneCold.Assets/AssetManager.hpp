@@ -20,7 +20,7 @@
 
 namespace StoneCold::Assets {
 
-using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 //
 // AssetManager to load and unlaod external Resources from the Filesystem

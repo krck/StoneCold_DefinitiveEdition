@@ -2,6 +2,7 @@
 #include "GamePlayScene.hpp"
 
 using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 using namespace StoneCold::Scenes;
 using namespace StoneCold::Assets;
 
@@ -26,9 +27,9 @@ bool GamePlayScene::Initialize() {
 	_ecs.AddSystem<SystemMotionRender>(_systemMotionRender);
 	_ecs.AddSystem<SystemStaticRender>(_systemStaticRender);
 
+	CreateLevelMap(LevelType::Grassland);
 	SpawnEnemy();
 	SpawnPlayer();
-	CreateLevelMap(LevelType::Grassland);
 	return true;
 }
 
@@ -71,7 +72,7 @@ void GamePlayScene::Render(sf::RenderTarget* renderTarget, sf::View* camera) {
 void GamePlayScene::SpawnPlayer() {
 	auto playerSpriteScale = 5.f;
 	auto playerSpriteTexRect = sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(32, 32));
-	auto playerPosition = sf::Vector2f(100.f, 100.f);
+	auto playerPosition = _currentMapTiles->SpawnPoint;
 	auto playerSpeed = 250.f;
 
 	//texture.setSmooth(true);

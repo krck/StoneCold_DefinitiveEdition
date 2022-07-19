@@ -1,10 +1,10 @@
 
-#ifndef STONECOLD_CORE_APPLICATIONCONFIG_H
-#define STONECOLD_CORE_APPLICATIONCONFIG_H
+#ifndef STONECOLD_COMMON_APPLICATIONCONFIG_H
+#define STONECOLD_COMMON_APPLICATIONCONFIG_H
 
 #include <string>
 
-namespace StoneCold::Core {
+namespace StoneCold::Common {
 
 // the configured options and settings for Tutorial
 static const std::string StoneCold_VERSION_MAJOR = "@StoneCold_VERSION_MAJOR@";

@@ -1,7 +1,7 @@
 
 #include "AssetManager.hpp"
 
-using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 using namespace StoneCold::Assets;
 
 bool AssetManager::Initialize(const std::string& basePath) {

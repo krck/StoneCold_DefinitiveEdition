@@ -1,9 +1,9 @@
 
 #include "MainMenuScene.hpp"
 
-using namespace StoneCold::Core;
-using namespace StoneCold::Scenes;
 using namespace StoneCold::Assets;
+using namespace StoneCold::Common;
+using namespace StoneCold::Scenes;
 using namespace StoneCold::GUI;
 
 MainMenuScene::MainMenuScene(scUint32 maxEntities, AssetManager& assetManager) 

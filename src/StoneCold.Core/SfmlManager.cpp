@@ -2,6 +2,7 @@
 #include "SfmlManager.hpp"
 
 using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 //
 // Initializes the SFML Ressources and 

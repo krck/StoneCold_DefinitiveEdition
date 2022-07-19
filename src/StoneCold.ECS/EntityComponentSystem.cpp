@@ -2,7 +2,7 @@
 #include "EntityComponentSystem.hpp"
 
 using namespace StoneCold::ECS;
-using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 EntityComponentSystem::EntityComponentSystem(scUint32 maxEntities)
 	: _maxEntities(maxEntities)

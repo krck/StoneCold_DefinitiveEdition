@@ -11,7 +11,7 @@
 
 namespace StoneCold::ECS {
 
-using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 //
 // Entity-Component-System (Manager)

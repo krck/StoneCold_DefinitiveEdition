@@ -8,7 +8,7 @@
 
 namespace StoneCold::Scenes {
 
-using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 class SceneAction  {
 public:

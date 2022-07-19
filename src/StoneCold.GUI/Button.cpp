@@ -2,7 +2,7 @@
 #include "Button.hpp"
 
 using namespace StoneCold::GUI;
-using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 Button::Button(scSptr<sf::Sprite> sprite, const sf::Font& font, scUint16 textSize, const sf::String& text) 
     : Widget(), _sprite(sprite), _text(sf::Text()), _pressed(false) {

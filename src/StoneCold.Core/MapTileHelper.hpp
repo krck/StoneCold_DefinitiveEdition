@@ -8,6 +8,8 @@
 
 namespace StoneCold::Core {
 
+using namespace StoneCold::Common;
+
 struct MapTileRenderInfo {
 	std::string TileTypeStr;
 	sf::IntRect TileTextureRect;
