@@ -25,25 +25,27 @@ using namespace StoneCold::Assets;
 // 
 class Scene  {
 public:
-	Scene(scUint32 maxEntities, AssetManager& assetManager) 
+	Scene(scUint32 maxEntities, AssetManager& assetManager, sf::RenderWindow* renderWindow) 
 		: _ecs(EntityComponentSystem(maxEntities))
 		, _assetManager(assetManager)
+		, _renderWindow(renderWindow)
 		, _pendingActions(std::vector<SceneAction>())
 		, _sceneEventCallback(nullptr) 
+		, _camera(renderWindow->getDefaultView())
 		{ }
 
 	inline EntityComponentSystem* GetECS() { return &_ecs; }
 
 	virtual bool Initialize() = 0;
 
-	virtual void Start()  { _isActive = true; } // = 0;
-	virtual void Stop() { _isActive = false; } // = 0;
+	virtual void Start() = 0;
+	virtual void Stop() = 0;
 	inline bool IsActive() const { return _isActive; }
 
 	virtual bool HandleEvent(const sf::Event&) = 0;
 	virtual void HandleInput(sf::WindowBase*) = 0;
 	virtual void Update(scUint32) = 0;
-	virtual void Render(sf::RenderTarget*, sf::View*) = 0;
+	virtual void Render() = 0;
 
 	inline void ClearActions() { _pendingActions.clear(); }
 	inline void RegisterAction(SceneAction&& action) { _pendingActions.emplace_back(action); }
@@ -54,8 +56,11 @@ protected:
 	bool _isActive;
 	EntityComponentSystem _ecs;
 	AssetManager& _assetManager;
+	sf::RenderWindow* _renderWindow;
 	std::vector<SceneAction> _pendingActions;
 	std::function<void(SceneEvent, SceneType)> _sceneEventCallback;
+	// Camera of the current scene
+	sf::View _camera; 
 };
 
 }

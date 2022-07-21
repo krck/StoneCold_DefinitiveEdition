@@ -3,7 +3,6 @@
         "name": "StoneCold Game",
         "width": 1600,
         "height": 1200,
-        "style": "Resize",
         "vSync": false,
         "maxFps": 60,
         "pixelDepth": 32

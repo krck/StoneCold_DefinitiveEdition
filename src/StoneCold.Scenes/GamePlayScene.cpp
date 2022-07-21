@@ -2,21 +2,21 @@
 #include "GamePlayScene.hpp"
 
 using namespace StoneCold::Core;
-using namespace StoneCold::Common;
 using namespace StoneCold::Scenes;
 using namespace StoneCold::Assets;
 
-GamePlayScene::GamePlayScene(scUint32 maxEntities, AssetManager& assetManager)
-	: Scene(maxEntities, assetManager)
+GamePlayScene::GamePlayScene(scUint32 maxEntities, AssetManager& assetManager, sf::RenderWindow* renderWindow)
+	: Scene(maxEntities, assetManager, renderWindow)
 	, _mapManager(MapManager())
 	, _currentMapTiles(nullptr)
-	, _player(0)
 	, _systemAnimation(std::make_shared<SystemAnimation>(_ecs))
 	, _systemInput(std::make_shared<SystemInput>(_ecs))
 	, _systemInputAnimation(std::make_shared<SystemInputAnimation>(_ecs))
 	, _systemInputTransform(std::make_shared<SystemInputTransform>(_ecs))
 	, _systemMotionRender(std::make_shared<SystemMotionRender>(_ecs))
-	, _systemStaticRender(std::make_shared<SystemStaticRender>(_ecs)) { }
+	, _systemStaticRender(std::make_shared<SystemStaticRender>(_ecs))
+	, _player(0)
+	{ }
 
 bool GamePlayScene::Initialize() {
 	// Add all the GamePlayScene Systems to the ECS
@@ -27,13 +27,36 @@ bool GamePlayScene::Initialize() {
 	_ecs.AddSystem<SystemMotionRender>(_systemMotionRender);
 	_ecs.AddSystem<SystemStaticRender>(_systemStaticRender);
 
+	_camera = sf::View(sf::FloatRect(sf::Vector2f(0.f, 0.f), sf::Vector2f(_renderWindow->getSize())));
+
 	CreateLevelMap(LevelType::Grassland);
 	SpawnEnemy();
 	SpawnPlayer();
 	return true;
 }
 
-bool GamePlayScene::HandleEvent(const sf::Event&) {
+void GamePlayScene::Start() {
+	_isActive = true;
+
+	// Re-calculate the current Camera View, when coming from any other scene
+	const auto& playerSpriteComp = _ecs.GetComponentArray<CSprite>()->at(_player);
+	_camera = sf::View(sf::Vector2f(0.f, 0.f), sf::Vector2f(_renderWindow->getSize()));
+	_camera.setCenter(playerSpriteComp.Sprite->getPosition());
+	_renderWindow->setView(_camera);
+}
+
+void GamePlayScene::Stop() {
+	_isActive = false;
+}
+
+bool GamePlayScene::HandleEvent(const sf::Event& event) {
+	if (event.type == sf::Event::Resized) { 
+		// Update the view to the new size of the window
+		const auto& playerSpriteComp = _ecs.GetComponentArray<CSprite>()->at(_player);
+		_camera = sf::View(sf::Vector2f(0.f, 0.f), sf::Vector2f(event.size.width, event.size.height));
+		_camera.setCenter(playerSpriteComp.Sprite->getPosition());
+		_renderWindow->setView(_camera);
+	}
 	return true;
 }
 
@@ -55,18 +78,19 @@ void GamePlayScene::Update(scUint32 frameTime) {
 	_systemAnimation->Update(frameTime);
 }
 
-void GamePlayScene::Render(sf::RenderTarget* renderTarget, sf::View* camera) {
+void GamePlayScene::Render() {
 	// First: Render all static sprites (MapTiles)
-	_systemStaticRender->Render(renderTarget, camera);
+	_systemStaticRender->Render(_renderWindow, _camera);
 	// Second: Render all moving sprites (Player, NPCs, ...)
-	_systemMotionRender->Render(renderTarget, camera);
+	_systemMotionRender->Render(_renderWindow, _camera);
 	// Third: Render the GUI (always top Layer)
 	// ...
 
 	// Get the Player Sprite from the ECS and center the camera (View) on the player position
+	// (Window view must be set after every change as it is copied into the renderTarget object)
 	const auto& playerSpriteComp = _ecs.GetComponentArray<CSprite>()->at(_player);
-	camera->setCenter(playerSpriteComp.Sprite->getPosition());
-	renderTarget->setView((*camera));
+	_camera.setCenter(playerSpriteComp.Sprite->getPosition());
+	_renderWindow->setView((_camera));
 }
 
 void GamePlayScene::SpawnPlayer() {

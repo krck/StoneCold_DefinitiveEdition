@@ -22,16 +22,19 @@ using namespace StoneCold::Assets;
 
 class GamePlayScene : public Scene {
 public:
-	GamePlayScene(scUint32 maxEntities, AssetManager& assetManager);
+	GamePlayScene(scUint32 maxEntities, AssetManager& assetManager, sf::RenderWindow* renderWindow);
 	GamePlayScene(const GamePlayScene&) = delete;
 	GamePlayScene& operator=(const GamePlayScene&) = delete;
 
 	virtual bool Initialize() override;
 
+	virtual void Start() override;
+	virtual void Stop() override;
+
 	virtual bool HandleEvent(const sf::Event&) override;
 	virtual void HandleInput(sf::WindowBase*) override;
 	virtual void Update(scUint32 frameTime) override;
-	virtual void Render(sf::RenderTarget* renderTarget, sf::View* camera) override;
+	virtual void Render() override;
 
 	~GamePlayScene() = default;
 
@@ -43,8 +46,6 @@ private:
 private:
 	MapManager _mapManager;
 	scSptr<GameMap> _currentMapTiles;
-	// EntityId's for fast access
-	scEntityId _player;
 	// System ptrs for fast access
 	scSptr<SystemAnimation> _systemAnimation;
 	scSptr<SystemInput> _systemInput;
@@ -52,8 +53,8 @@ private:
 	scSptr<SystemInputTransform> _systemInputTransform;
 	scSptr<SystemMotionRender> _systemMotionRender;
 	scSptr<SystemStaticRender> _systemStaticRender;
-
-	sf::Sprite _playerSprite;
+	// EntityId's for fast access
+	scEntityId _player;
 };
 
 }

@@ -58,7 +58,6 @@ private:
 	bool _globalEXIT;
 	std::string _basePath;
 	sf::RenderWindow* _window;
-	sf::View* _playerCamera;
 	// Managers
 	SfmlManager _sfml;
 	AssetManager _assetManager;

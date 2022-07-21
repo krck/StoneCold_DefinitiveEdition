@@ -21,13 +21,13 @@ public:
 	SystemStaticRender(const SystemStaticRender&) = delete;
 	SystemStaticRender& operator=(const SystemStaticRender&) = delete;
 
-	virtual void Render(sf::RenderTarget* renderTarget, sf::View* camera) override {
+	virtual void Render(sf::RenderTarget* renderTarget, const sf::View& camera) override {
 		auto& spriteComponents = *_ecs.GetComponentArray<CSprite>();
 		auto& staticComponents = *_ecs.GetComponentArray<CStaticPosition>();
 
 		// Get the camera bounds to draw only Sprites that are in the current view
-		const auto& camCenter = camera->getCenter();
-		const auto& camSize = camera->getSize();
+		const auto& camCenter = camera.getCenter();
+		const auto& camSize = camera.getSize();
 		const auto cameraRect = sf::FloatRect(sf::Vector2f(camCenter.x - (camSize.x / 2.f), camCenter.y - (camSize.y / 2.f)), camSize);
 
 		for (const auto& entityId : _entities) {

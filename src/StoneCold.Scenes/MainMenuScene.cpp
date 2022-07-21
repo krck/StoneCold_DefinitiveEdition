@@ -6,18 +6,33 @@ using namespace StoneCold::Common;
 using namespace StoneCold::Scenes;
 using namespace StoneCold::GUI;
 
-MainMenuScene::MainMenuScene(scUint32 maxEntities, AssetManager& assetManager) 
-	: Scene(maxEntities, assetManager) 
+MainMenuScene::MainMenuScene(scUint32 maxEntities, AssetManager& assetManager, sf::RenderWindow* renderWindow) 
+	: Scene(maxEntities, assetManager, renderWindow) 
 	, _guiWidgets(std::vector<scSptr<Widget>>())
 	{ }
 
 bool MainMenuScene::Initialize() {
+	_camera = _renderWindow->getDefaultView();
 	CreateGui();
 	return true;
-} 
+}
 
-bool MainMenuScene::HandleEvent(const sf::Event&) {
-	return true;  
+void MainMenuScene::Start() {
+	_isActive = true;
+}
+
+void MainMenuScene::Stop() {
+	_isActive = false;
+}
+
+bool MainMenuScene::HandleEvent(const sf::Event& event) {
+	if (event.type == sf::Event::Resized) { 
+		// Update the view to the new size of the window
+		sf::FloatRect visibleArea { sf::Vector2f(0.f, 0.f), sf::Vector2f(event.size.width, event.size.height) };
+		_camera = sf::View(visibleArea);
+		_renderWindow->setView(_camera);
+	}
+	return true;
 }
 
 void MainMenuScene::HandleInput(sf::WindowBase* window) {
@@ -40,10 +55,10 @@ void MainMenuScene::Update(scUint32) {
 
 }
 
-void MainMenuScene::Render(sf::RenderTarget* renderTarget, sf::View*) {
-	renderTarget->setView(renderTarget->getDefaultView());
+void MainMenuScene::Render() {
+	_renderWindow->setView(_camera);
 	for (const auto& widget : _guiWidgets) {
-		widget->Render(renderTarget);
+		widget->Render(_renderWindow);
 	}
 }
 
