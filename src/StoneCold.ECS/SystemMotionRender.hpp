@@ -12,7 +12,7 @@ class SystemMotionRender : public System {
 public:
 	//
 	// Hardcoded System Component-Mask: 
-	// Only Entities with a Transformation and Velocity component will be updated with this System
+	// Only Entities with a CSprite and CTransform component will be updated with this System
 	//
 	SystemMotionRender(EntityComponentSystem& ecs)
 		: System((GetComponentMask<CSprite>() | GetComponentMask<CTransform>()))
@@ -21,7 +21,8 @@ public:
 	SystemMotionRender(const SystemMotionRender&) = delete;
 	SystemMotionRender& operator=(const SystemMotionRender&) = delete;
 
-	virtual void Render(sf::RenderTarget* renderTarget, const sf::View& camera) override {
+	virtual scUint32 Render(sf::RenderTarget* renderTarget, const sf::View& camera) override {
+		scUint32 drawCount = 0;
 		auto& spriteComponents = *_ecs.GetComponentArray<CSprite>();
 		auto& transformComponents = *_ecs.GetComponentArray<CTransform>();
 
@@ -34,17 +35,25 @@ public:
 			auto& s = spriteComponents[entityId];
 			auto& t = transformComponents[entityId];
 
-			// Transform (Scale, Flip and Move) the Sprite
-			s.FlipSprite = (t.Velocity.x == 0 ? s.FlipSprite : (t.Velocity.x < 0 ? -1 : 1));
-			s.Sprite->setScale({ (s.FlipSprite * t.Scale), (1.f * t.Scale) });
+			// Transform the Sprite
+			s.Sprite->setScale(sf::Vector2f(t.Scale, t.Scale));
 			s.Sprite->move(t.Velocity);
 
 			// Draw Sprite if visible, based on the lastet transformation
 			if(cameraRect.findIntersection(s.Sprite->getGlobalBounds())) {
+				// Flip the Sprit, in case of movement direction change (left/rigt)
+				// (This is done by simply flipping the "width" part of the current TextureRect)
+				s.FlipSprite = (t.Velocity.x == 0 ? s.FlipSprite : (t.Velocity.x < 0 ? -1.f : 1.f));
+				s.TextureRect = (s.FlipSprite < 0
+								? sf::IntRect(sf::Vector2i(s.TextureRect.left + s.TextureRect.width, s.TextureRect.top), sf::Vector2i(s.TextureRect.width * -1.f, s.TextureRect.height))
+								: sf::IntRect(sf::Vector2i(s.TextureRect.left, s.TextureRect.top), sf::Vector2i(s.TextureRect.width, s.TextureRect.height))
+				);
 				s.Sprite->setTextureRect(s.TextureRect);
 				renderTarget->draw(*s.Sprite);
+				drawCount++;
 			}
 		}
+		return drawCount;
 	}
 
 private:

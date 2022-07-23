@@ -62,10 +62,9 @@ int GameCore::Run() {
 		bool windowHasFocus = true;
 
 		// FPS calculation variables
-		bool showFPS = true;
 		scInt32 frameTime = 0; // delta in ms
 		scInt64 frameCount = 0;
-		const scUint8 frameCountMax = 40;
+		const scUint8 frameCountMax = 60;
 		auto frameTimes = std::array<scUint32, frameCountMax>();
 		float averageFPS = 0.f;
 
@@ -132,23 +131,18 @@ int GameCore::Run() {
 				_window->display();
 
 				// -------------------------------------------------------------------------
-				// Toggle FPS output when F1 is pressed
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::F1))
-					showFPS = !showFPS;
 				// FPS counter (average)
 				frameTimes[frameCount++] = frameTime;
 				if (frameCount == frameCountMax) {
 					frameCount = 0;
 					averageFPS = 0.f;
-					if (showFPS) {
-						// In case it should be visible: Calculate and print the average FPS
-						for (size_t i = 0; i < frameCountMax; i++) {
-							averageFPS += frameTimes[i];
-						}
-
-						averageFPS = 1000.f / (averageFPS / frameCountMax);
-						std::cout << "FPS: " << averageFPS << "\n";
+					// In case it should be visible: Calculate and print the average FPS
+					for (size_t i = 0; i < frameCountMax; i++) {
+						averageFPS += frameTimes[i];
 					}
+
+					averageFPS = 1000.f / (averageFPS / frameCountMax);
+					std::cout << "FPS: " << (scUint16)averageFPS << "\n";
 				}
 				// -------------------------------------------------------------------------
 			}

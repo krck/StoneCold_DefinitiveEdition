@@ -7,9 +7,12 @@ using namespace StoneCold::Assets;
 
 GamePlayScene::GamePlayScene(scUint32 maxEntities, AssetManager& assetManager, sf::RenderWindow* renderWindow)
 	: Scene(maxEntities, assetManager, renderWindow)
+	, _showDebugOutput(false)
 	, _mapManager(MapManager())
 	, _currentMapTiles(nullptr)
 	, _systemAnimation(std::make_shared<SystemAnimation>(_ecs))
+	, _systemCollisionDetection(std::make_shared<SystemCollisionDetection>(_ecs))
+	, _systemCollisionResolution(std::make_shared<SystemCollisionResolution>(_ecs))
 	, _systemInput(std::make_shared<SystemInput>(_ecs))
 	, _systemInputAnimation(std::make_shared<SystemInputAnimation>(_ecs))
 	, _systemInputTransform(std::make_shared<SystemInputTransform>(_ecs))
@@ -21,6 +24,8 @@ GamePlayScene::GamePlayScene(scUint32 maxEntities, AssetManager& assetManager, s
 bool GamePlayScene::Initialize() {
 	// Add all the GamePlayScene Systems to the ECS
 	_ecs.AddSystem<SystemAnimation>(_systemAnimation);
+	_ecs.AddSystem<SystemCollisionDetection>(_systemCollisionDetection);
+	_ecs.AddSystem<SystemCollisionResolution>(_systemCollisionResolution);
 	_ecs.AddSystem<SystemInput>(_systemInput);
 	_ecs.AddSystem<SystemInputAnimation>(_systemInputAnimation);
 	_ecs.AddSystem<SystemInputTransform>(_systemInputTransform);
@@ -68,6 +73,10 @@ void GamePlayScene::HandleInput(sf::WindowBase*) {
 	for (const auto& action : _pendingActions) {
 		if(action.GetAction() == "ACTN_ESC" && _sceneEventCallback != nullptr)
 			_sceneEventCallback(SceneEvent::ChangeScene, SceneType::MainMenu);
+		else if(action.GetAction() == "DEBUG_MODE" && action.GetType() == ActionType::Start)
+			_showDebugOutput = !_showDebugOutput;
+		// else if(action.GetAction() == "DEBUG_MODE" && action.GetType() == ActionType::End)
+		// 	_showDebugOutput = false;
 	}
 	
 	ClearActions();
@@ -76,15 +85,25 @@ void GamePlayScene::HandleInput(sf::WindowBase*) {
 void GamePlayScene::Update(scUint32 frameTime) {
 	_systemInputTransform->Update(frameTime);
 	_systemAnimation->Update(frameTime);
+	
+	//_systemCollisionDetection->Update(frameTime);
+	//_systemCollisionResolution->Update(frameTime);
 }
 
 void GamePlayScene::Render() {
+	scUint32 drawCount = 0;
 	// First: Render all static sprites (MapTiles)
-	_systemStaticRender->Render(_renderWindow, _camera);
+	drawCount += _systemStaticRender->Render(_renderWindow, _camera);
 	// Second: Render all moving sprites (Player, NPCs, ...)
-	_systemMotionRender->Render(_renderWindow, _camera);
+	drawCount += _systemMotionRender->Render(_renderWindow, _camera);
 	// Third: Render the GUI (always top Layer)
 	// ...
+
+	// Debug "output" with BoundingBox rectangles
+	if(_showDebugOutput) {
+		drawCount += _systemCollisionDetection->Render(_renderWindow, _camera);
+		//std::cout <<"Rendered entities: " <<drawCount <<std::endl;
+	}
 
 	// Get the Player Sprite from the ECS and center the camera (View) on the player position
 	// (Window view must be set after every change as it is copied into the renderTarget object)
@@ -95,8 +114,7 @@ void GamePlayScene::Render() {
 
 void GamePlayScene::SpawnPlayer() {
 	auto playerSpriteScale = 5.f;
-	auto playerSpriteTexRect = sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(32, 32));
-	auto playerPosition = _currentMapTiles->SpawnPoint;
+	auto playerPosition = _spawnPoint;
 	auto playerSpeed = 250.f;
 
 	//texture.setSmooth(true);
@@ -110,14 +128,14 @@ void GamePlayScene::SpawnPlayer() {
 	_player = _ecs.CreateEntity();
 	_ecs.AddComponent<CInput>(_player, {});
 	_ecs.AddComponent<CAnimation>(_player, { playerAnimations, playerSpriteAsset->GetFrameSize(), defaultAnimation, defaultAnimation, 0, 0, 0 });
-	_ecs.AddComponent<CTransform>(_player, { playerPosition, sf::Vector2f(), playerSpeed, 0.f, playerSpriteScale });
-	_ecs.AddComponent<CSprite>(_player, { playerSprite, playerSpriteTexRect, sf::Color::White, 1.f });
-
+	_ecs.AddComponent<CPosition>(_player, { playerPosition, playerPosition });
+	_ecs.AddComponent<CTransform>(_player, { sf::Vector2f(), playerSpeed, 0.f, playerSpriteScale });
+	_ecs.AddComponent<CSprite>(_player, { playerSprite, sf::IntRect(sf::Vector2i(0, 0), playerSpriteAsset->GetFrameSize()), sf::Color::White, 1.f });
+	_ecs.AddComponent<CBoundingBox>(_player, { _player, (sf::Vector2f(14.f, 18.f) * playerSpriteScale), (sf::Vector2f(7.f, 9.f) * playerSpriteScale), sf::Vector2f(), true });
 }
 
 void GamePlayScene::SpawnEnemy() {
 	auto enemySpriteScale = 5.f;
-	auto enemySpriteTexRect = sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(32, 32));
 	auto enemyPosition = sf::Vector2f(800.f, 800.f);
 
 	_assetManager.AddSpriteAnimated("Sprite_Skeleton_1", "Sprite_Skeleton");
@@ -129,21 +147,22 @@ void GamePlayScene::SpawnEnemy() {
 
 	auto enemy = _ecs.CreateEntity();
 	_ecs.AddComponent<CAnimation>(enemy, { skeletonAnimations, skeletonSpriteAsset->GetFrameSize(), defaultAnimation, defaultAnimation, 0, 0, 0 });
-	_ecs.AddComponent<CTransform>(enemy, { enemyPosition, sf::Vector2f(), 200.f, 0.f, enemySpriteScale });
-	_ecs.AddComponent<CSprite>(enemy, { skeletonSprite, enemySpriteTexRect, sf::Color::White, 1.f });
+	_ecs.AddComponent<CPosition>(enemy, { enemyPosition, enemyPosition });
+	_ecs.AddComponent<CTransform>(enemy, { sf::Vector2f(), 200.f, 0.f, enemySpriteScale });
+	_ecs.AddComponent<CSprite>(enemy, { skeletonSprite, sf::IntRect(sf::Vector2i(0, 0), skeletonSpriteAsset->GetFrameSize()), sf::Color::White, 1.f });
 }
 
 void GamePlayScene::CreateLevelMap(LevelType levelType) {
 
 	scUint64 mapSize = 60;
 	auto mapTileScale = 6.0f;
-	auto frameWidth = 32.0f;
+	auto textureFrameWidth = 32.0f;
 
 	_currentMapTiles = _mapManager.GenerateMap(levelType, sf::Vector2i(mapSize, mapSize));
-
+	auto tile = _ecs.CreateEntity();
 
 	sf::RenderTexture mapRenderTexture;
-	const auto textureSize = (mapSize * mapTileScale * frameWidth);
+	const auto textureSize = (mapSize * mapTileScale * textureFrameWidth);
 	const auto textureFrameSize = sf::Vector2u(textureSize, textureSize);
 	if (!mapRenderTexture.create(textureFrameSize)) { /* error... */ }
 
@@ -158,21 +177,25 @@ void GamePlayScene::CreateLevelMap(LevelType levelType) {
 			auto tileSpriteAsset = _assetManager.GetSpriteStatic(spriteName);
 			auto tileSprite = tileSpriteAsset->GetSprite();
 
-			const auto xPosition = tileSprite->getLocalBounds().width * column * mapTileScale;
-			const auto yPosition = tileSprite->getLocalBounds().height * row * mapTileScale;
-			const auto tilePosition = sf::Vector2f(xPosition, yPosition);
+			const auto tileWidth = tileSprite->getLocalBounds().width * mapTileScale;
+			const auto tileHeight = tileSprite->getLocalBounds().height * mapTileScale;
+			const auto tilePosition = sf::Vector2f(tileWidth * column, tileHeight * row);
 
-			tileSprite->setScale({ (mapTileRenderInfo.TileTextureFlip * mapTileScale), (1.f * mapTileScale) });
+			tileSprite->setScale({ mapTileScale, mapTileScale });
 			tileSprite->setPosition(tilePosition);
 			tileSprite->setTextureRect(mapTileRenderInfo.TileTextureRect);
 
 			mapRenderTexture.draw(*tileSprite.get());
 
-			// // Add the CollisionComponent in case its a Wall-Tile
-			// if (static_cast<int>(type->first) > static_cast<int>(MapTileType::Floor_Shadow))
-			// 	gameECS->AddComponent<CollisionComponent>(entityId, { 2, Vec2(pos.DestRect.w, pos.DestRect.h), pos.DestRect, nullptr });
-			// else
-			// 	gameECS->RemoveComponent<CollisionComponent>(entityId);
+			// Add the CollisionComponent in case its a Wall-Tile
+			if(static_cast<int>(_currentMapTiles->TileGrid[row][column]) > static_cast<int>(MapTileType::Floor_Shadow)) {
+				auto tileCollision = _ecs.CreateEntity();
+				_ecs.AddComponent<CPosition>(tileCollision, { tilePosition, tilePosition });
+				_ecs.AddComponent<CBoundingBox>(tileCollision, { tile, sf::Vector2f(tileWidth, tileHeight), sf::Vector2f(tileWidth / 2.f, tileHeight / 2.f), sf::Vector2f(), false });
+			}
+
+			if(_currentMapTiles->TileGrid[row][column] == MapTileType::Portal)
+				_spawnPoint = tilePosition;
 		}
 	}
 	mapRenderTexture.display();
@@ -183,7 +206,7 @@ void GamePlayScene::CreateLevelMap(LevelType levelType) {
 	auto renderRect = sf::IntRect(sf::Vector2i(), sf::Vector2i(textureSize, textureSize));
 
 	// Add the Tile to the ECS
-	auto tile = _ecs.CreateEntity();
-	_ecs.AddComponent<CStaticPosition>(tile, { sf::Vector2f(), 0.f, 1.f });
+	_ecs.AddComponent<CStatic>(tile, { 0.f, 1.f });
+	_ecs.AddComponent<CPosition>(tile, { sf::Vector2f(), sf::Vector2f() });
 	_ecs.AddComponent<CSprite>(tile, { fullMapSprite->GetSprite(), renderRect, sf::Color::White, 1.f });
 }

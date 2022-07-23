@@ -13,7 +13,7 @@ class SystemInputAnimation : public System {
 public:
 	//
 	// Hardcoded System Component-Mask: 
-	// Only Entities with a Transformation and Velocity component will be updated with this System
+	// Only Entities with a CInput and CAnimation component will be updated with this System
 	//
 	SystemInputAnimation(EntityComponentSystem& ecs)
 		: System((GetComponentMask<CInput>() | GetComponentMask<CAnimation>()))

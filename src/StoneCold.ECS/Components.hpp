@@ -22,16 +22,19 @@ struct CInput {
 	inline bool ActionEnd(const std::string& a) const { return (Actions.find(a) != Actions.end() ? (Actions.at(a) == ActionType::End) : false); }
 };
 
-struct CTransform {
+struct CPosition {
 	sf::Vector2f PositionAbs;
+	sf::Vector2f PositionAbsPrevious;
+};
+
+struct CTransform {
 	sf::Vector2f Velocity;
 	float Speed;
 	float Angle;
 	float Scale;
 };
 
-struct CStaticPosition {
-	sf::Vector2f PositionAbs;
+struct CStatic {
 	float Angle;
 	float Scale;
 };
@@ -53,8 +56,12 @@ struct CAnimation {
 	scUint16 CurrentIndex;
 };
 
-struct CCollision {
-	sf::Vector2f Hitbox;
+struct CBoundingBox {
+	scUint32 Type;
+	sf::Vector2f BBSize;
+	sf::Vector2f BBSizeHalf;
+	sf::Vector2f Overlap;
+	bool CalculateOverlap;
 };
 
 struct CScore {

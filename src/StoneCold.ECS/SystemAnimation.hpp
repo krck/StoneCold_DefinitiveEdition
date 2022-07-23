@@ -12,7 +12,7 @@ class SystemAnimation : public System {
 public:
 	//
 	// Hardcoded System Component-Mask: 
-	// Only Entities with a Transformation and Velocity component will be updated with this System
+	// Only Entities with a CSprite and CAnimation component will be updated with this System
 	//
 	SystemAnimation(EntityComponentSystem& ecs)
 		: System((GetComponentMask<CSprite>() | GetComponentMask<CAnimation>()))

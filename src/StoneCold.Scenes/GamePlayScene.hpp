@@ -8,6 +8,8 @@
 #include "MapTileHelper.hpp"
 #include "SystemInput.hpp"
 #include "SystemAnimation.hpp"
+#include "SystemCollisionDetection.hpp"
+#include "SystemCollisionResolution.hpp"
 #include "SystemInputAnimation.hpp"
 #include "SystemInputTransform.hpp"
 #include "SystemMotionRender.hpp"
@@ -44,10 +46,14 @@ private:
 	void CreateLevelMap(LevelType levelType);
 
 private:
+	bool _showDebugOutput;
 	MapManager _mapManager;
 	scSptr<GameMap> _currentMapTiles;
+	sf::Vector2f _spawnPoint;
 	// System ptrs for fast access
 	scSptr<SystemAnimation> _systemAnimation;
+	scSptr<SystemCollisionDetection> _systemCollisionDetection;
+	scSptr<SystemCollisionResolution> _systemCollisionResolution;
 	scSptr<SystemInput> _systemInput;
 	scSptr<SystemInputAnimation> _systemInputAnimation;
 	scSptr<SystemInputTransform> _systemInputTransform;

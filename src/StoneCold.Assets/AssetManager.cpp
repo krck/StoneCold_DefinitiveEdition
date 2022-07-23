@@ -60,7 +60,7 @@ void AssetManager::AddSpriteAnimated(const std::string& assetName, const std::st
 	auto animationConfig = _spritesJson["animatedSprites"][sprite];
 	// Extract the animation values from the json config
 	auto textureName = animationConfig["textureName"].get<std::string>();
-	auto frameSize = sf::Vector2i(animationConfig["frameWidth"].get<int>(), animationConfig["frameHeight"].get<int>());
+	auto frameSize = sf::Vector2i(animationConfig["textureFrameWidth"].get<int>(), animationConfig["textureFrameHeight"].get<int>());
 	auto defaultAnim = animationConfig["defaultAnimation"].get<std::string>();
 	std::vector<AssetAnimation> animationData;
 	for(const auto& item : animationConfig["animations"].items()) {
@@ -89,7 +89,7 @@ void AssetManager::AddSpriteStatic(const std::string& assetName, const std::stri
 	auto animationConfig = _spritesJson["staticSprites"][sprite];
 	// Extract the animation values from the json config
 	auto textureName = animationConfig["textureName"].get<std::string>();
-	auto frameSize = sf::Vector2i(animationConfig["frameWidth"].get<int>(), animationConfig["frameHeight"].get<int>());
+	auto frameSize = sf::Vector2i(animationConfig["textureFrameWidth"].get<int>(), animationConfig["textureFrameHeight"].get<int>());
 
 	// Add the Sprite to the cache
 	auto tmpAsset = ScAssetSpriteStatic(assetName, GetTexture(textureName), frameSize);

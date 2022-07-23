@@ -34,8 +34,6 @@ public:
         _sprite = std::make_shared<sf::Sprite>();
         _sprite->setTexture(texture);
         _sprite->setTextureRect(sf::IntRect(sf::Vector2i(0, 0), _frameSize));
-        // Set every Sprite "Origin" to the Center of the Rect
-        _sprite->setOrigin({ _sprite->getLocalBounds().width / 2.f, _sprite->getLocalBounds().height / 2.f });
 
         // Transform the AssetAnimation data into a lookup map, by name
         std::unordered_map<std::string, AssetAnimation> animationMap;

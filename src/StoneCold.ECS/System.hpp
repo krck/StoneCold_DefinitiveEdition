@@ -25,7 +25,7 @@ public:
 
 	virtual void HandleInput(const std::vector<SceneAction>&) { }
 	virtual void Update(scUint64) { }
-	virtual void Render(sf::RenderTarget*, const sf::View&) { }
+	virtual scUint32 Render(sf::RenderTarget*, const sf::View&) { return 0; }
 
 	inline scBitMask64 GetSystemMask() const { return _componentMask; }
 	inline size_t GetEntitiesSize() const { return _entities.size(); }

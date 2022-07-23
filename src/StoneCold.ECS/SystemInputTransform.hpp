@@ -11,10 +11,10 @@ class SystemInputTransform : public System {
 public:
 	//
 	// Hardcoded System Component-Mask: 
-	// Only Entities with a Transformation and Velocity component will be updated with this System
+	// Only Entities with a CInput and CTransform component will be updated with this System
 	//
 	SystemInputTransform(EntityComponentSystem& ecs)
-		: System((GetComponentMask<CInput>() | GetComponentMask<CTransform>()))
+		: System((GetComponentMask<CInput>() | GetComponentMask<CTransform>() | GetComponentMask<CPosition>()))
 		, _ecs(ecs) { }
 
 	SystemInputTransform(const SystemInputTransform&) = delete;
@@ -23,6 +23,7 @@ public:
 	virtual void Update(scUint64 frameTime) override {
 		auto& inputComponents = *_ecs.GetComponentArray<CInput>();
 		auto& transformComponents = *_ecs.GetComponentArray<CTransform>();
+		auto& positionComponents = *_ecs.GetComponentArray<CPosition>();
 
 		// Add a simple form of numerical integration (Explicit Euler) to speeds at different FPSs
 		// (Explicit Euler works well as long as the speeds is constant or the frameTime is low)
@@ -31,6 +32,7 @@ public:
 		for (const auto& entityId : _entities) {
 			auto& i = inputComponents[entityId];
 			auto& t = transformComponents[entityId];
+			auto& p = positionComponents[entityId];
 
 			// For each keykeyStates contains a value of 1 if pressed and a value of 0 if not pressed
 			// Add negative and positive velocity so the sprite doesn't move if both are pressed at the same time
@@ -45,7 +47,8 @@ public:
 
 			t.Velocity.x = (tmpVelocity.x * t.Speed) * deltaSec;
 			t.Velocity.y = (tmpVelocity.y * t.Speed) * deltaSec;
-			t.PositionAbs += t.Velocity;
+			p.PositionAbsPrevious = p.PositionAbs;
+			p.PositionAbs += t.Velocity;
 		}
 	}
 

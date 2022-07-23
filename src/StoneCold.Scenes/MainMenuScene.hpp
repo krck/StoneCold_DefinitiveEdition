@@ -34,6 +34,9 @@ public:
 	~MainMenuScene() = default;
 
 private:
+	void CenterMenuButtons();
+
+private:
 	void CreateGui();
 
 	void OnPlayClicked();
@@ -42,6 +45,7 @@ private:
 
 private:
 	std::vector<scSptr<Widget>> _guiWidgets;
+	const sf::Vector2f _menuMargin = sf::Vector2f(30.f, 30.f);
 };
 
 }
