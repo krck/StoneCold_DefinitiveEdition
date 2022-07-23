@@ -3,12 +3,14 @@
         "Sprite_Grassland": {
             "textureName": "Texture_Grassland",
             "textureFrameWidth": 32,
-            "textureFrameHeight": 32
+            "textureFrameHeight": 32,
+            "textureScale": 6.0
         },
         "Sprite_GuiButton": {
             "textureName": "Texture_GuiButton",
             "textureFrameWidth": 200,
-            "textureFrameHeight": 50
+            "textureFrameHeight": 50,
+            "textureScale": 2.0
         }
     },
     "animatedSprites": {
@@ -16,6 +18,7 @@
             "textureName": "Texture_Player",
             "textureFrameWidth": 32,
             "textureFrameHeight": 32,
+            "textureScale": 5.0,
             "defaultAnimation": "Idle",
             "animations": [
                 { "name": "Idle",           "frameSpeed": 10, "frameCount": 5, "yOffset": 0 },
@@ -32,6 +35,7 @@
             "textureName": "Texture_Skeleton",
             "textureFrameWidth": 32,
             "textureFrameHeight": 32,
+            "textureScale": 5.0,
             "defaultAnimation": "Idle",
             "animations": [
                 { "name": "Idle",           "frameSpeed": 10, "frameCount": 11, "yOffset": 0 },

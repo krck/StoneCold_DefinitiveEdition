@@ -12,7 +12,8 @@ using namespace StoneCold::Common;
 
 class ScAssetSpriteStatic : public ScAsset {
 public:
-    ScAssetSpriteStatic(const std::string& name, const sf::Texture& texture, const sf::Vector2i& frameSize) : ScAsset(name), _frameSize(frameSize) {
+    ScAssetSpriteStatic(const std::string& name, const sf::Texture& texture, const sf::Vector2i& frameSize, float scale) 
+        : ScAsset(name), _frameSize(frameSize), _scale(scale) {
         // Create and configure the 2D Sprite
         _sprite = std::make_shared<sf::Sprite>();
         _sprite->setTexture(texture);
@@ -22,10 +23,12 @@ public:
     // Hand out Sprite as shared_ptr for ease of use
     inline scSptr<sf::Sprite> GetSprite() { return _sprite; }
     inline sf::Vector2i GetFrameSize() const { return _frameSize; }
+    inline float GetScale() const { return _scale; }
 
 private:
     scSptr<sf::Sprite> _sprite;
     const sf::Vector2i _frameSize;
+    const float _scale;
 };
 
 }

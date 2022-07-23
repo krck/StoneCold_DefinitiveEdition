@@ -196,6 +196,8 @@ enum ActionMap {
 	Mouse_Left = 200,
 	Mouse_Right = 201,
 	Mouse_Moved = 202,
+	Mouse_ScrolledUp = 203,
+	Mouse_ScrolledDown = 204,
 };
 
 }

@@ -116,6 +116,9 @@
 
         { "id": 200,    "enumName": "Mouse_Left",           "action": "ACTN_ACTION_PRIMARY" },
         { "id": 201,    "enumName": "Mouse_Right",          "action": "ACTN_ACTION_SECONDARY" },
-        { "id": 202,    "enumName": "Mouse_Moved",          "action": "ACTN_CURSOR_MOVE" }
+        { "id": 202,    "enumName": "Mouse_Moved",          "action": "ACTN_CURSOR_MOVE" },
+        { "id": 203,    "enumName": "Mouse_ScrolledUp",     "action": "ZOOM_OUT" },
+        { "id": 204,    "enumName": "Mouse_ScrolledDown",   "action": "ZOOM_IN" }
+
     ]
 }

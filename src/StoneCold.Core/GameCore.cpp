@@ -110,6 +110,14 @@ int GameCore::Run() {
 				else if (event.type == sf::Event::MouseMoved && _actionMap.find(ActionMap::Mouse_Moved) != _actionMap.end()) {
 					_activeScene->RegisterAction(SceneAction(ActionMap::Mouse_Moved, ActionType::Start, _actionMap[ActionMap::Mouse_Moved]));
 				}
+				else if (event.type == sf::Event::MouseWheelScrolled && event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
+				{
+					if(event.mouseWheelScroll.delta < 0 && _actionMap.find(ActionMap::Mouse_ScrolledUp) != _actionMap.end())
+						_activeScene->RegisterAction(SceneAction(ActionMap::Mouse_ScrolledUp, ActionType::Start, _actionMap[ActionMap::Mouse_ScrolledUp]));
+					if(event.mouseWheelScroll.delta > 0 && _actionMap.find(ActionMap::Mouse_ScrolledDown) != _actionMap.end())
+						_activeScene->RegisterAction(SceneAction(ActionMap::Mouse_ScrolledDown, ActionType::Start, _actionMap[ActionMap::Mouse_ScrolledDown]));						
+				}
+				// Other Input Events
 				else if (event.type == sf::Event::TextEntered) {
 					// TextEntered differs from KeyPressed Events, as it contains a "full" user input if possible
 					// Example: Pressing '^' then 'e' on a French keyboard will produce two KeyPressed events, but a single TextEntered 'ê' character

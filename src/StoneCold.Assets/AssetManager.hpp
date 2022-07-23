@@ -43,7 +43,7 @@ public:
 	void AddTexture(const std::string& assetName, const std::string& path);
 	void AddSpriteAnimated(const std::string& assetName, const std::string& sprite);
 	void AddSpriteStatic(const std::string& assetName, const std::string& sprite);
-	void AddSpriteStatic(const std::string& assetName, sf::Texture&& texture, const sf::Vector2i& frameSize);
+	void AddSpriteStatic(const std::string& assetName, sf::Texture&& texture, const sf::Vector2i& frameSize, float scale);
 	// sf::Sound* LoadSound(const std::string& name);
 
 	inline const sf::Font& GetFont(const std::string& name) const { return static_cast<ScAssetFont*>(_assets.at(name).get())->GetFont(); }

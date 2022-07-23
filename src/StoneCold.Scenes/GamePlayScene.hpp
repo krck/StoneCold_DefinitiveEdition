@@ -41,12 +41,15 @@ public:
 	~GamePlayScene() = default;
 
 private:
+	void ResizeCamera();
+
 	void SpawnPlayer();
 	void SpawnEnemy();
 	void CreateLevelMap(LevelType levelType);
 
 private:
 	bool _showDebugOutput;
+	float _cameraZoom;
 	MapManager _mapManager;
 	scSptr<GameMap> _currentMapTiles;
 	sf::Vector2f _spawnPoint;

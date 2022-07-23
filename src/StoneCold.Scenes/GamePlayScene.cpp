@@ -8,6 +8,7 @@ using namespace StoneCold::Assets;
 GamePlayScene::GamePlayScene(scUint32 maxEntities, AssetManager& assetManager, sf::RenderWindow* renderWindow)
 	: Scene(maxEntities, assetManager, renderWindow)
 	, _showDebugOutput(false)
+	, _cameraZoom(1.f)
 	, _mapManager(MapManager())
 	, _currentMapTiles(nullptr)
 	, _systemAnimation(std::make_shared<SystemAnimation>(_ecs))
@@ -42,12 +43,8 @@ bool GamePlayScene::Initialize() {
 
 void GamePlayScene::Start() {
 	_isActive = true;
-
 	// Re-calculate the current Camera View, when coming from any other scene
-	const auto& playerSpriteComp = _ecs.GetComponentArray<CSprite>()->at(_player);
-	_camera = sf::View(sf::Vector2f(0.f, 0.f), sf::Vector2f(_renderWindow->getSize()));
-	_camera.setCenter(playerSpriteComp.Sprite->getPosition());
-	_renderWindow->setView(_camera);
+	ResizeCamera();
 }
 
 void GamePlayScene::Stop() {
@@ -56,11 +53,8 @@ void GamePlayScene::Stop() {
 
 bool GamePlayScene::HandleEvent(const sf::Event& event) {
 	if (event.type == sf::Event::Resized) { 
-		// Update the view to the new size of the window
-		const auto& playerSpriteComp = _ecs.GetComponentArray<CSprite>()->at(_player);
-		_camera = sf::View(sf::Vector2f(0.f, 0.f), sf::Vector2f(event.size.width, event.size.height));
-		_camera.setCenter(playerSpriteComp.Sprite->getPosition());
-		_renderWindow->setView(_camera);
+		// Re-calculate the current Camera View, when window is resized
+		ResizeCamera();
 	}
 	return true;
 }
@@ -71,12 +65,21 @@ void GamePlayScene::HandleInput(sf::WindowBase*) {
 
 	// ESC to go back to the Main Menu
 	for (const auto& action : _pendingActions) {
-		if(action.GetAction() == "ACTN_ESC" && _sceneEventCallback != nullptr)
+		if(action.GetAction() == "ACTN_ESC" && _sceneEventCallback != nullptr) {
 			_sceneEventCallback(SceneEvent::ChangeScene, SceneType::MainMenu);
-		else if(action.GetAction() == "DEBUG_MODE" && action.GetType() == ActionType::Start)
+		}
+		else if(action.GetAction() == "DEBUG_MODE" && action.GetType() == ActionType::Start) {
 			_showDebugOutput = !_showDebugOutput;
-		// else if(action.GetAction() == "DEBUG_MODE" && action.GetType() == ActionType::End)
-		// 	_showDebugOutput = false;
+		}
+		else if(action.GetAction() == "ZOOM_IN" && action.GetType() == ActionType::Start) {
+			_cameraZoom = (_cameraZoom <= 1.f ? 1.f : _cameraZoom - 0.1f);
+			ResizeCamera();
+		}
+		else if(action.GetAction() == "ZOOM_OUT" && action.GetType() == ActionType::Start) {
+			const float maxZoom = (_showDebugOutput ? 6.f : 1.5f);
+			_cameraZoom = (_cameraZoom >= maxZoom ? maxZoom : _cameraZoom + 0.1f);
+			ResizeCamera();
+		}
 	}
 	
 	ClearActions();
@@ -112,8 +115,15 @@ void GamePlayScene::Render() {
 	_renderWindow->setView((_camera));
 }
 
+void  GamePlayScene::ResizeCamera() {
+	const auto& playerSpriteComp = _ecs.GetComponentArray<CSprite>()->at(_player);
+	_camera = sf::View(sf::Vector2f(0.f, 0.f), sf::Vector2f(_renderWindow->getSize()));
+	_camera.setCenter(playerSpriteComp.Sprite->getPosition());
+	_camera.zoom(_cameraZoom);
+	_renderWindow->setView(_camera);
+}
+
 void GamePlayScene::SpawnPlayer() {
-	auto playerSpriteScale = 5.f;
 	auto playerPosition = _spawnPoint;
 	auto playerSpeed = 250.f;
 
@@ -125,17 +135,19 @@ void GamePlayScene::SpawnPlayer() {
 	auto playerSprite = playerSpriteAsset->GetSprite();
 	playerSprite->move(playerPosition);
 
+	const auto aabb = (sf::Vector2f(14.f, 18.f) * playerSpriteAsset->GetScale());
+	const auto aabbHalf = (sf::Vector2f(7.f, 9.f) * playerSpriteAsset->GetScale());
+
 	_player = _ecs.CreateEntity();
 	_ecs.AddComponent<CInput>(_player, {});
 	_ecs.AddComponent<CAnimation>(_player, { playerAnimations, playerSpriteAsset->GetFrameSize(), defaultAnimation, defaultAnimation, 0, 0, 0 });
 	_ecs.AddComponent<CPosition>(_player, { playerPosition, playerPosition });
-	_ecs.AddComponent<CTransform>(_player, { sf::Vector2f(), playerSpeed, 0.f, playerSpriteScale });
+	_ecs.AddComponent<CTransform>(_player, { sf::Vector2f(), playerSpeed, 0.f, playerSpriteAsset->GetScale() });
 	_ecs.AddComponent<CSprite>(_player, { playerSprite, sf::IntRect(sf::Vector2i(0, 0), playerSpriteAsset->GetFrameSize()), sf::Color::White, 1.f });
-	_ecs.AddComponent<CBoundingBox>(_player, { _player, (sf::Vector2f(14.f, 18.f) * playerSpriteScale), (sf::Vector2f(7.f, 9.f) * playerSpriteScale), sf::Vector2f(), true });
+	_ecs.AddComponent<CBoundingBox>(_player, { _player, aabb, aabbHalf, sf::Vector2f(), true });
 }
 
 void GamePlayScene::SpawnEnemy() {
-	auto enemySpriteScale = 5.f;
 	auto enemyPosition = sf::Vector2f(800.f, 800.f);
 
 	_assetManager.AddSpriteAnimated("Sprite_Skeleton_1", "Sprite_Skeleton");
@@ -148,7 +160,7 @@ void GamePlayScene::SpawnEnemy() {
 	auto enemy = _ecs.CreateEntity();
 	_ecs.AddComponent<CAnimation>(enemy, { skeletonAnimations, skeletonSpriteAsset->GetFrameSize(), defaultAnimation, defaultAnimation, 0, 0, 0 });
 	_ecs.AddComponent<CPosition>(enemy, { enemyPosition, enemyPosition });
-	_ecs.AddComponent<CTransform>(enemy, { sf::Vector2f(), 200.f, 0.f, enemySpriteScale });
+	_ecs.AddComponent<CTransform>(enemy, { sf::Vector2f(), 200.f, 0.f, skeletonSpriteAsset->GetScale() });
 	_ecs.AddComponent<CSprite>(enemy, { skeletonSprite, sf::IntRect(sf::Vector2i(0, 0), skeletonSpriteAsset->GetFrameSize()), sf::Color::White, 1.f });
 }
 
@@ -158,15 +170,18 @@ void GamePlayScene::CreateLevelMap(LevelType levelType) {
 	auto mapTileScale = 6.0f;
 	auto textureFrameWidth = 32.0f;
 
+	// RNG generate a new Tile Map
 	_currentMapTiles = _mapManager.GenerateMap(levelType, sf::Vector2i(mapSize, mapSize));
 	auto tile = _ecs.CreateEntity();
 
+	// Create a singular Texture, where all the Map Tiles will be drawn to
+	// (Then, when rendering the game the wohle map is only one entity ... not 5.000 or even more)
 	sf::RenderTexture mapRenderTexture;
 	const auto textureSize = (mapSize * mapTileScale * textureFrameWidth);
 	const auto textureFrameSize = sf::Vector2u(textureSize, textureSize);
 	if (!mapRenderTexture.create(textureFrameSize)) { /* error... */ }
-
 	mapRenderTexture.clear();
+
 	for (scUint64 row = 0; row < mapSize; row++) {
 		for (scUint64 column = 0; column < mapSize; column++) {
 			// Get the Tile infos from the generated Map
@@ -201,7 +216,7 @@ void GamePlayScene::CreateLevelMap(LevelType levelType) {
 	mapRenderTexture.display();
 
 	auto tmpTex = mapRenderTexture.getTexture();
-	_assetManager.AddSpriteStatic("Sprite_Grassland_Generated", std::move(tmpTex), sf::Vector2i(textureSize, textureSize));
+	_assetManager.AddSpriteStatic("Sprite_Grassland_Generated", std::move(tmpTex), sf::Vector2i(textureSize, textureSize), 1.f);
 	auto fullMapSprite = _assetManager.GetSpriteStatic("Sprite_Grassland_Generated");
 	auto renderRect = sf::IntRect(sf::Vector2i(), sf::Vector2i(textureSize, textureSize));
 

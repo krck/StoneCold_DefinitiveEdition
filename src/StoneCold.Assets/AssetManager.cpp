@@ -61,6 +61,7 @@ void AssetManager::AddSpriteAnimated(const std::string& assetName, const std::st
 	// Extract the animation values from the json config
 	auto textureName = animationConfig["textureName"].get<std::string>();
 	auto frameSize = sf::Vector2i(animationConfig["textureFrameWidth"].get<int>(), animationConfig["textureFrameHeight"].get<int>());
+	auto textureScale = animationConfig["textureScale"].get<float>();
 	auto defaultAnim = animationConfig["defaultAnimation"].get<std::string>();
 	std::vector<AssetAnimation> animationData;
 	for(const auto& item : animationConfig["animations"].items()) {
@@ -74,7 +75,7 @@ void AssetManager::AddSpriteAnimated(const std::string& assetName, const std::st
 	}
 
 	// Add the Sprite to the cache
-	auto tmpAsset = ScAssetSpriteAnimated(assetName, GetTexture(textureName), animationData, defaultAnim, frameSize);
+	auto tmpAsset = ScAssetSpriteAnimated(assetName, GetTexture(textureName), animationData, defaultAnim, frameSize, textureScale);
 	_assets.insert({ assetName, std::make_shared<ScAssetSpriteAnimated>(tmpAsset) });
 }
 
@@ -90,17 +91,18 @@ void AssetManager::AddSpriteStatic(const std::string& assetName, const std::stri
 	// Extract the animation values from the json config
 	auto textureName = animationConfig["textureName"].get<std::string>();
 	auto frameSize = sf::Vector2i(animationConfig["textureFrameWidth"].get<int>(), animationConfig["textureFrameHeight"].get<int>());
+	auto textureScale = animationConfig["textureScale"].get<float>();
 
 	// Add the Sprite to the cache
-	auto tmpAsset = ScAssetSpriteStatic(assetName, GetTexture(textureName), frameSize);
+	auto tmpAsset = ScAssetSpriteStatic(assetName, GetTexture(textureName), frameSize, textureScale);
 	_assets.insert({ assetName, std::make_shared<ScAssetSpriteStatic>(tmpAsset) });
 }
 
-void AssetManager::AddSpriteStatic(const std::string& assetName, sf::Texture&& texture, const sf::Vector2i& frameSize) {
+void AssetManager::AddSpriteStatic(const std::string& assetName, sf::Texture&& texture, const sf::Vector2i& frameSize, float scale) {
 	// Hard overwrite any Sprite/Texture with the same name
 	// (This is mostly going to be used for the Level Map, and that data can be discarted/overwritten as soon as the level ends anyway)
 	_assets[assetName + "_TEX"] = std::make_shared<ScAssetTexture>(ScAssetTexture(assetName, std::move(texture)));
-	_assets[assetName] = std::make_shared<ScAssetSpriteStatic>(ScAssetSpriteStatic(assetName, GetTexture(assetName + "_TEX"), frameSize));
+	_assets[assetName] = std::make_shared<ScAssetSpriteStatic>(ScAssetSpriteStatic(assetName, GetTexture(assetName + "_TEX"), frameSize, scale));
 }
 
 bool AssetManager::RemoveAsset(const std::string& name) {
