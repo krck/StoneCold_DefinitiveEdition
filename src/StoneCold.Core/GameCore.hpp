@@ -4,8 +4,6 @@
 
 #include <stack>
 #include <array>
-#include <thread>
-#include <chrono>
 #include <functional>
 #include <filesystem>
 #include <windows.h>

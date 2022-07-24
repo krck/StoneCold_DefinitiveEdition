@@ -60,20 +60,18 @@ int GameCore::Run() {
 		sf::Clock clock; // Starts the clock
 		sf::Event event;
 		bool windowHasFocus = true;
-		// FPS limiter
-		const float fpsLimit = _assetManager.GetSettingsJson()["window"]["maxFps"].get<float>();
-		const scUint32 msPerFrame = 1000.f / fpsLimit;
-		scUint32 frameElapsedMs; // always one frame behind
+
 		// FPS calculation variables
-		scInt32 frameCount = 0;
+		scInt32 frameTime = 0; // delta in ms
+		scInt64 frameCount = 0;
 		const scUint8 frameCountMax = 60;
 		auto frameTimes = std::array<scUint32, frameCountMax>();
 		float averageFPS = 0.f;
 
 		// Start the main loop
 		while (!_globalEXIT) {
-			// Get the current frame start time in ms (use "steady_clock")
-			const auto frameStart = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now());
+			// Clock restart returns the elapsed (frame)time
+			frameTime = clock.restart().asMilliseconds();
 
 			// Poll the event loop to gather events from input devices
 			_activeScene->ClearActions();
@@ -136,13 +134,13 @@ int GameCore::Run() {
 				// Engine Input/Update/Render cycle
 				_window->clear(sf::Color::Black);
 				_activeScene->HandleInput(_window);
-				_activeScene->Update(frameElapsedMs); 
+				_activeScene->Update(frameTime); 
 				_activeScene->Render();
 				_window->display();
 
 				// -------------------------------------------------------------------------
 				// FPS counter (average)
-				frameTimes[frameCount++] = frameElapsedMs;
+				frameTimes[frameCount++] = frameTime;
 				if (frameCount == frameCountMax) {
 					frameCount = 0;
 					averageFPS = 0.f;
@@ -152,18 +150,10 @@ int GameCore::Run() {
 					}
 
 					averageFPS = 1000.f / (averageFPS / frameCountMax);
-					//std::cout << "FPS: " << (scUint16)averageFPS << "\n";
+					std::cout << "FPS: " << (scUint16)averageFPS << "\n";
 				}
 				// -------------------------------------------------------------------------
 			}
-
-			// Limit FPS by waiting in case the current frame time is below the limit
-			const auto frameEnd = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now());
-			frameElapsedMs = (frameEnd - frameStart).count();
-			if(frameElapsedMs < msPerFrame) {
-				std::this_thread::sleep_for(std::chrono::milliseconds(msPerFrame - frameElapsedMs));
-			}
-			std::cout <<frameElapsedMs <<std::endl;
 		}
 		_window->close();
 
