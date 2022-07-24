@@ -38,7 +38,7 @@ public:
 
 	virtual void Update(scUint64) override {
 		auto& boundingBoxComponents = *_ecs.GetComponentArray<CBoundingBox>();
-		auto& positionComponents = *_ecs.GetComponentArray<CPosition>();
+		auto& positionComponents = *_ecs.GetComponentArray<CPosition>(); 
 
 		for (const auto& entityId : _entities) {
 			auto& b = boundingBoxComponents[entityId];

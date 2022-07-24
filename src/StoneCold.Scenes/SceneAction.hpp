@@ -10,6 +10,13 @@ namespace StoneCold::Scenes {
 
 using namespace StoneCold::Common;
 
+//
+// Action class
+//
+// A "Action" is a generic mapping from every possible kind of input event to a simple, string-named action.
+// This provides a generic interface as "Scene Inupt" whereby the Scenes Input/Update/Render functions do not need
+// any specific knowledge about the input. It can come from a keyboard, a joystic, a server-stream, a replay-file, etc.
+//
 class SceneAction  {
 public:
 	SceneAction(ActionMap id, ActionType type, const std::string& action) : _id(id), _type(type), _action(action) { }

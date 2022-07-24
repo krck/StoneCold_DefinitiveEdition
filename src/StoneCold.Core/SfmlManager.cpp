@@ -25,13 +25,13 @@ bool SfmlManager::Initialize(const AssetManager& assets) {
 		_window->setActive(true);
 
 		// Set Framerate OR VSync (They do not go well together. Is one or the other)
-		if(!vSyncEnabled) {
-			_window->setVerticalSyncEnabled(false);
-			_window->setFramerateLimit(maxFPS);
-		} 
-		else {
-			_window->setVerticalSyncEnabled(true);
-		}
+		// if(!vSyncEnabled) {
+		// 	_window->setVerticalSyncEnabled(false);
+		// 	_window->setFramerateLimit(maxFPS);
+		// } 
+		// else {
+		// 	_window->setVerticalSyncEnabled(true);
+		// }
 
 		return true;
 	}
