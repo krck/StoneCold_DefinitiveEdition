@@ -25,104 +25,10 @@ int main() {
 #include <vector>
 #include <stack>
 #include <string>
+#include "Types.hpp"
+#include "Exception.hpp"
 
-#include <Types.hpp>
 using namespace StoneCold::Common;
-
-
-struct Component { bool Active = false; };
-struct CPosition : public Component { int x; int y; };
-struct CCollision : public Component { int width; int height; int x; int y; };
-struct CHealth : public Component { int hp; };
-
-
-class EntityMemoryPool {
-public:
-	static EntityMemoryPool& Instance() {
-		static EntityMemoryPool pool(1000);
-		return pool;
-	}
-
-	size_t AddEntity(const std::string& tag) {
-		size_t entityId = GetNextFreeIndex();
-		// Set all components to a default value
-		std::get<std::vector<CPosition>>(_entityComponents)[entityId] = CPosition();
-		std::get<std::vector<CCollision>>(_entityComponents)[entityId] = CCollision();
-		std::get<std::vector<CHealth>>(_entityComponents)[entityId] = CHealth();
-		// Set the tag and active flag
-		_entityTags[entityId] = tag;
-		_entityActive[entityId] = true;
-		return entityId;
-	}
-
-	template<typename T>
-	inline T& GetComponent(size_t entityId) { return std::get<std::vector<T>>(_entityComponents)[entityId]; }
-	template<typename T>
-	inline const T& GetComponent(size_t entityId) const { return std::get<std::vector<T>>(_entityComponents)[entityId]; }
-
-	template<typename T>
-	inline bool HasComponent(size_t entityId) const { return dynamic_cast<Component>(std::get<std::vector<T>>(_entityComponents)[entityId]).Active; }
-
-	inline const std::string& GetTag(size_t entityId) const { return _entityTags[entityId]; }
-	inline bool GetActive(size_t entityId) const { return _entityActive[entityId]; }
-
-private:
-	EntityMemoryPool(size_t maxSize);
-
-	size_t GetNextFreeIndex() { 
-		// Get index of first entity that is not "active"
-		// _entityActive[i] == false ?? use this 
-	}
-
-private:
-	size_t _entityCount;
-	std::vector<std::string> _entityTags;
-	std::vector<bool> _entityActive;
-
-	std::tuple<
-		std::vector<CPosition>,
-		std::vector<CCollision>,
-		std::vector<CHealth>
-	> _entityComponents;
-
-}; 
-
-
-
-class EntityManager {
-public:
-	size_t AddEntity(const std::string& tag) {
-		size_t e = EntityMemoryPool::Instance().AddEntity(tag);
-		_entities.push_back(e);
-		_entitiesByTag[tag].push_back(e);
-		return e;
-	}
-
-    template<typename T,typename... TArgs>
-    T& AddComponent(size_t entityId, TArgs&&... mArgs) {
-        auto& component = EntityMemoryPool::Instance().GetComponent<T>(entityId);
-        component = T(std::forward<TArgs>(mArgs)...);
-        component.Active = true;
-        return component;
-    }
-
-    template<typename T>
-    T& RemoveComponent(size_t entityId) {
-        auto& component = EntityMemoryPool::Instance().GetComponent<T>(entityId);
-        component.Active = false;
-        return component;
-    }
-
-private:
-	std::vector<size_t> _entities;
-	std::map<std::string, std::vector<size_t>> _entitiesByTag;
-};
-
-
-
-
-
-
 
 /*
 	EntityComponentManager
@@ -149,41 +55,94 @@ private:
 
 */
 
+
+struct Component { bool Active = false; };
+struct CPosition : public Component { int x; int y; };
+struct CCollision : public Component { int width; int height; int x; int y; };
+struct CHealth : public Component { int hp; };
+
+
 class EntityComponentManager {
 public:
-	EntityComponentManager(scUint16 maxSize);
+	EntityComponentManager(scUint16 maxSize) 
+		: _maxSize(maxSize)
+		, _entityActive(std::vector<bool>(maxSize, false))
+		, _entityTags(std::vector<std::string>(maxSize, "")) {
+		// Initialize all the Component pools with default constructed components
+		std::get<std::vector<CPosition>>(_entityComponentPools) = std::vector<CPosition>(maxSize, CPosition());
+		std::get<std::vector<CCollision>>(_entityComponentPools) = std::vector<CCollision>(maxSize, CCollision());
+		std::get<std::vector<CHealth>>(_entityComponentPools) = std::vector<CHealth>(maxSize, CHealth());
+	}
+
 	EntityComponentManager(const EntityComponentManager&) = delete;
 	EntityComponentManager& operator=(const EntityComponentManager&) = delete;
 
+	// ----------------------------------------------------------
 	// --------------------- ENTITY LOGIC -----------------------
-	scEntityId AddEntity(const std::string& tag);
-	void RemoveEntity(scEntityId entityId);
+	// ----------------------------------------------------------
 
-	bool GetActive(scEntityId entityId) const;
-	const std::string& GetTag(scEntityId entityId) const;
-	scSptr<std::vector<scEntityId>> GetEntities(const std::string& tag);
+	scEntityId AddEntity(const std::string& tag) {
+		scEntityId entityId = GetNextFreeIndex();
+		_entityActive[entityId] = true;
+		_entityTags[entityId] = tag;
+		// Reset all components to a default constructed value
+		// std::get<std::vector<CPosition>>(_entityComponentPools)[entityId] = CPosition();
+		// std::get<std::vector<CCollision>>(_entityComponentPools)[entityId] = CCollision();
+		// std::get<std::vector<CHealth>>(_entityComponentPools)[entityId] = CHealth();
+		return entityId;
+	}
 
+	void RemoveEntity(scEntityId entityId) {
+		_entityActive[entityId] = false;
+		_entityTags[entityId] = "";
+	}
+
+	inline bool GetActive(scEntityId entityId) const { return _entityActive[entityId]; }
+	inline const std::string& GetTag(scEntityId entityId) const { return _entityTags[entityId]; }
+	//std::vector<scEntityId> GetEntities(const std::string& tag);
+
+	// ----------------------------------------------------------
 	// ----------------- ENTITY-COMPONENT LOGIC -----------------
-	template<typename T> T& AddComponent(scEntityId entityId, T&& component);
-    template<typename T> void RemoveComponent(scEntityId entityId);
+	// ----------------------------------------------------------
 
-	template<typename T> T& GetComponent(scEntityId entityId);
-	template<typename T> const T& GetComponent(scEntityId entityId) const;
-	template<typename T> bool HasComponent(scEntityId entityId) const;
+	template<typename T> T& AddComponent(scEntityId entityId, T&& component) {
+        auto& eComp = std::get<std::vector<T>>(_entityComponentPools)[entityId];
+        eComp = std::move(component);
+        eComp.Active = true;
+        return eComp;
+	}
 
-	// -------------------- COMPONENT LOGIC ---------------------
-	template<typename T> void RegisterComponentPool();
-	template<typename T> bool HasComponentPool() const;
+	template<typename T> T& AddComponent(scEntityId entityId, const T& component) {
+        auto& eComp = std::get<std::vector<T>>(_entityComponentPools)[entityId];
+        eComp = component;
+        eComp.Active = true;
+        return eComp;
+	}
+
+    template<typename T> void RemoveComponent(scEntityId entityId) {
+        auto& eComp = std::get<std::vector<T>>(_entityComponentPools)[entityId];
+        eComp.Active = false;
+	}
+
+	template<typename T> inline T& GetComponent(scEntityId entityId) { return std::get<std::vector<T>>(_entityComponentPools)[entityId]; }
+	template<typename T> inline const T& GetComponent(scEntityId entityId) const { return std::get<std::vector<T>>(_entityComponentPools)[entityId]; }
+	template<typename T> inline bool HasComponent(scEntityId entityId) const  { return std::get<std::vector<T>>(_entityComponentPools)[entityId].Active; }
 
 	~EntityComponentManager() = default;
 
 private:
+	scEntityId GetNextFreeIndex() {
+		for (size_t i = 0; i < _entityActive.size(); i++) {
+			if(!_entityActive[i]) return i;
+		}
+		throw GameException("No more Entity Ids available. Max: " + _maxSize);
+	}
+
+private:
 	const scUint16 _maxSize;
-	std::stack<scEntityId> _availableEntities;
 	// ----------- ENTITY MEMBERS -----------
 	std::vector<bool> _entityActive;
 	std::vector<std::string> _entityTags;
-	std::vector<scEntityId> _entities;
 	// std::map<std::string, std::vector<scEntityId>> _entitiesByTag;
 	// --------- COMPONENT MEMBERS ----------
 	std::tuple<
@@ -197,17 +156,8 @@ private:
 
 
 
-
-
-
-
-
-
-
-
-
-
 int main() {
-
+	EntityComponentManager ecm(10);
+ 
 	return 0;
 }
