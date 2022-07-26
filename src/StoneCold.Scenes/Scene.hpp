@@ -9,7 +9,7 @@
 #include "Enums.hpp"
 #include "SceneAction.hpp"
 #include "AssetManager.hpp"
-#include "EntityComponentSystem.hpp"
+#include "EntityComponentManager.hpp"
 
 namespace StoneCold::Scenes {
 
@@ -26,7 +26,7 @@ using namespace StoneCold::Assets;
 class Scene  {
 public:
 	Scene(scUint32 maxEntities, AssetManager& assetManager, sf::RenderWindow* renderWindow) 
-		: _ecs(EntityComponentSystem(maxEntities))
+		: _ecm(EntityComponentManager(maxEntities))
 		, _assetManager(assetManager)
 		, _renderWindow(renderWindow)
 		, _pendingActions(std::vector<SceneAction>())
@@ -34,7 +34,7 @@ public:
 		, _camera(renderWindow->getDefaultView())
 		{ }
 
-	inline EntityComponentSystem* GetECS() { return &_ecs; }
+	inline EntityComponentManager* GetECS() { return &_ecm; }
 
 	virtual bool Initialize() = 0;
 
@@ -54,7 +54,7 @@ public:
 
 protected:
 	bool _isActive;
-	EntityComponentSystem _ecs;
+	EntityComponentManager _ecm;
 	AssetManager& _assetManager;
 	sf::RenderWindow* _renderWindow;
 	std::vector<SceneAction> _pendingActions;

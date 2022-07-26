@@ -27,7 +27,7 @@ using scBitMask32 = std::uint32_t;
 using scBitMask64 = std::uint64_t;
 // StoneCold custom integer typedefs
 using scByte = std::uint_fast8_t;
-using scEntityId = std::uint_fast16_t;
+using scEntityId = std::uint_fast32_t;
 using scHash = std::uint_fast64_t;
 
 template<class T> using scUptr = std::unique_ptr<T>;

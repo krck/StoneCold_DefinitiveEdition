@@ -6,14 +6,6 @@
 #include "Scene.hpp"
 #include "MapManager.hpp"
 #include "MapTileHelper.hpp"
-#include "SystemInput.hpp"
-#include "SystemAnimation.hpp"
-#include "SystemCollisionDetection.hpp"
-#include "SystemCollisionResolution.hpp"
-#include "SystemInputAnimation.hpp"
-#include "SystemInputTransform.hpp"
-#include "SystemMotionRender.hpp"
-#include "SystemStaticRender.hpp"
 
 namespace StoneCold::Scenes {
 
@@ -43,27 +35,35 @@ public:
 private:
 	void ResizeCamera();
 
+	// Input system logic
+	void SystemInputSceneSpecific();
+	void SystemInputPlayer();
+	void SystemInputAnimation();
+	// Update system logic
+	void SystemUpdateTransformation(scUint32 frameTime);
+	void SystemUpdateAnimation(scUint32 frameTime);
+	void SystemUpdateCollisionDetection(scUint32 frameTime);
+	void SystemUpdateCollisionResolution(scUint32 frameTime);
+	// Render system logic
+	void SystemRenderStaticSprites();
+	void SystemRenderMotionSprites();
+	void SystemRenderDebugOutput();
+
 	void SpawnPlayer();
-	void SpawnEnemy();
+	void SpawnEnemies();
 	void CreateLevelMap(LevelType levelType);
 
 private:
 	bool _showDebugOutput;
 	float _cameraZoom;
 	MapManager _mapManager;
-	scSptr<GameMap> _currentMapTiles;
 	sf::Vector2f _spawnPoint;
-	// System ptrs for fast access
-	scSptr<SystemAnimation> _systemAnimation;
-	scSptr<SystemCollisionDetection> _systemCollisionDetection;
-	scSptr<SystemCollisionResolution> _systemCollisionResolution;
-	scSptr<SystemInput> _systemInput;
-	scSptr<SystemInputAnimation> _systemInputAnimation;
-	scSptr<SystemInputTransform> _systemInputTransform;
-	scSptr<SystemMotionRender> _systemMotionRender;
-	scSptr<SystemStaticRender> _systemStaticRender;
+	scSptr<GameMap> _currentMapTiles;
 	// EntityId's for fast access
-	scEntityId _player;
+	scEntityId _ePlayer;
+	scEntityId _eMapBackground;
+	std::vector<scEntityId> _eMapTiles;
+	std::vector<scEntityId> _eEnemies;
 };
 
 }
