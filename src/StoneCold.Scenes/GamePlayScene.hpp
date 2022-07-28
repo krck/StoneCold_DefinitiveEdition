@@ -40,13 +40,13 @@ private:
 	void SystemInputPlayer();
 	void SystemInputAnimation();
 	// Update system logic
-	void SystemUpdateTransformation(scUint32 frameTime);
-	void SystemUpdateAnimation(scUint32 frameTime);
+	void SystemUpdatePlayerTransformation(const scEntityId& entityId, float deltaSec);
+	void SystemUpdateAnimation(const scEntityId& entityId);
 	void SystemUpdateCollisionDetection(scUint32 frameTime);
 	void SystemUpdateCollisionResolution(scUint32 frameTime);
 	// Render system logic
-	void SystemRenderStaticSprites();
-	void SystemRenderMotionSprites();
+	void SystemRenderStaticSprites(const scEntityId& entityId, const sf::FloatRect& cameraRect);
+	void SystemRenderMotionSprites(const scEntityId& entityId, const sf::FloatRect& cameraRect);
 	void SystemRenderDebugOutput();
 
 	void SpawnPlayer();

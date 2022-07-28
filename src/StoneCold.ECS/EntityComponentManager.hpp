@@ -18,27 +18,31 @@ using namespace StoneCold::Common;
 /*
 	EntityComponentManager
 	Main part of the ECS is the EntityComponentManager with Entity tracking and the Component memory pools.
-	(This implementation trades memory cache optimization for some quicker adding and removing of entities)
 
-					 Entity 0			Entity 1			Entity 2
-				________________________________________________________________________
-				|				 	|				 	|				 	|
-	CPosition	|  x:7 y:5 a:TRUE 	|  x:2 y:2 a:TRUE 	|  x:0 y:0 a:FALSE 	|
-				|___________________|___________________|___________________|_____ ...
-				|					|					|					|
-	CHealth		|	hp:500 a:TURE	|	hp:0 a:FALSE	|	hp:0 a:FALSE	|
-				|___________________|___________________|___________________|_____ ...
-				|
-				...
-				|___________________|___________________|___________________|_____ ...
-	Tag			|______PLAYER_______|_______TILE________|___________________|_____ ...
-	Active		|_______TRUE________|_______TRUE________|______FALSE________|_____ ...
+	This specific implementation (Entity has an "Active" bool and Component is just an "Active" bit) sacrifices a bit of
+	cache-coherency (meaning: speed on looping and manipulating components) for more speed when it comes to adding and
+	removing both entities and components.
 
-	Simplicity and speed based on:
-	- Entities have a Active Flag
-	- Components have a Active Flag
-	This allows for very quick "adding" and "removing" of Entities and theirs components, as only this flag
-	needsto be changed and the memory will be available and overwritten as soon as new Entity is added
+							 Entity 0			  Entity 1			  Entity 2
+						________________________________________________________________________
+						|				 	|				 	|				 	|
+	CPosition			|  x:7 y:5 a:TRUE 	|  x:2 y:2 a:TRUE 	|  x:0 y:0 a:FALSE 	|
+						|___________________|___________________|___________________|_____ ...
+						|					|					|					|
+	CHealth				|	hp:500 a:TURE	|	hp:0 a:FALSE	|	hp:0 a:FALSE	|
+						|___________________|___________________|___________________|_____ ...
+						|
+						...
+						|___________________|___________________|___________________|_____ ...
+	Entity Active		|_______TRUE________|_______TRUE________|______FALSE________|_____ ...
+	Entity Tag			|______PLAYER_______|_______TILE________|___________________|_____ ...
+	Component Bitmask	|_______0011________|_______0001________|_______0000________|_____ ...
+
+	Components are not stored in any "packed" data container where they can be looped without cache-misses, instead they are
+	stored in a simple vector and are added and removed manily by setting the Bit Mask on the entity. But that will !! leave 
+	"gaps" when looping components. This might not be completley in line with the general ECS "Cache-optimization" principal,
+	but it removes so much complexity on data containers, that its generally faster than the old "packed-array" versions.
+
 */
 
 class EntityComponentManager {
@@ -47,7 +51,8 @@ public:
 		: _maxSize(maxSize)
 		, _availableIds(std::queue<scEntityId>())
 		, _entityActive(std::vector<bool>(maxSize, false))
-		, _entityTags(std::vector<std::string>(maxSize, "")) {
+		, _entityTags(std::vector<std::string>(maxSize, ""))
+		, _entityComponentMasks(std::vector<scBitMask64>(maxSize, 0)) {
 		// Initialize all the Component pools with default constructed components
 		std::get<std::vector<CInput>>(_entityComponentPools) = std::vector<CInput>(maxSize, CInput());
 		std::get<std::vector<CPosition>>(_entityComponentPools) = std::vector<CPosition>(maxSize, CPosition());
@@ -65,8 +70,8 @@ public:
 	EntityComponentManager(const EntityComponentManager&) = delete;
 	EntityComponentManager& operator=(const EntityComponentManager&) = delete;
 
-	inline scUint32 GetMaxSize() { return _maxSize; }
-	inline scUint32 GetFreeSize() { return _availableIds.size(); }
+	inline scUint32 GetMaxSize() noexcept { return _maxSize; }
+	inline scUint32 GetAvailableSize() noexcept { return _availableIds.size(); }
 
 	~EntityComponentManager() = default;
 
@@ -79,7 +84,7 @@ public:
 		_entityActive[entityId] = true;
 		_entityTags[entityId] = tag;
 		_availableIds.pop();
-		// Reset all components to a default constructed value 
+		// Reset all components to a default constructed value
 		// !!!!!! Might remove if this becomes to costly !!!!!!
 		std::get<std::vector<CInput>>(_entityComponentPools)[entityId] = CInput();
 		std::get<std::vector<CPosition>>(_entityComponentPools)[entityId] = CPosition();
@@ -94,11 +99,23 @@ public:
 	void RemoveEntity(scEntityId entityId) {
 		_entityActive[entityId] = false;
 		_entityTags[entityId] = "";
+		_entityComponentMasks[entityId] = 0;
 		_availableIds.push(entityId);
 	}
 
-	inline bool GetActive(scEntityId entityId) { return _entityActive[entityId]; }
-	inline const std::string& GetTag(scEntityId entityId) const { return _entityTags[entityId]; }
+	inline bool GetEntityActive(scEntityId entityId) { return _entityActive[entityId]; }
+	inline const std::string& GetEntityTag(scEntityId entityId) const { return _entityTags[entityId]; }
+	inline scBitMask64 GetEntityComponentMask(scEntityId entityId) const { return _entityComponentMasks[entityId]; }
+
+	std::vector<scEntityId> GetEntitiesByComponents(const scBitMask64& componentMask) {
+		std::vector<scEntityId> tmpVec;
+		tmpVec.reserve(_maxSize - _availableIds.size());
+		for (scUint32 e = 0; e < _maxSize; e++) {
+			if ((_entityComponentMasks[e] & componentMask) == componentMask)
+				tmpVec.push_back(e);
+		}
+		return tmpVec;
+	}
 
 	// ----------------------------------------------------------
 	// ----------------- ENTITY-COMPONENT LOGIC -----------------
@@ -107,18 +124,22 @@ public:
 	template<typename T> T& AddComponent(scEntityId entityId, T&& component) {
 		auto& eComp = std::get<std::vector<T>>(_entityComponentPools)[entityId];
 		eComp = std::move(component);
-		eComp.Active = true;
+		// Add the Component Flag to the mask (OR bitmask with the current value)
+		_entityComponentMasks[entityId] |= _componentMasks[typeid(T)];
 		return eComp;
 	}
 
 	template<typename T> void RemoveComponent(scEntityId entityId) {
-		// !!!! Might remove if this becomes to costly / Just set Active = false !!!!
 		std::get<std::vector<T>>(_entityComponentPools)[entityId] = T();
+		// Remove the Component Flag from the mask (AND with the inverse of the bitmask)
+		_entityComponentMasks[entityId] &= ~_componentMasks[typeid(T)];
 	}
 
 	template<typename T> inline T& GetComponent(scEntityId entityId) { return std::get<std::vector<T>>(_entityComponentPools)[entityId]; }
 	template<typename T> inline const T& GetComponent(scEntityId entityId) const { return std::get<std::vector<T>>(_entityComponentPools)[entityId]; }
-	template<typename T> inline bool HasComponent(scEntityId entityId) { return std::get<std::vector<T>>(_entityComponentPools)[entityId].Active; }
+	template<typename T> inline bool HasComponent(scEntityId entityId) { return ((_entityComponentMasks[entityId] & _componentMasks[typeid(T)]) == _componentMasks[typeid(T)]); }
+
+	template<typename T> inline scBitMask32 GetComponentMask() { return _componentMasks[typeid(T)]; }
 
 private:
 	const scUint32 _maxSize;
@@ -126,6 +147,7 @@ private:
 	// ----------- ENTITY MEMBERS -----------
 	std::vector<bool> _entityActive;
 	std::vector<std::string> _entityTags;
+	std::vector<scBitMask64> _entityComponentMasks;
 	// --------- COMPONENT MEMBERS ----------
 	std::tuple<
 		std::vector<CInput>,
@@ -136,6 +158,16 @@ private:
 		std::vector<CAnimation>,
 		std::vector<CBoundingBox>
 	> _entityComponentPools;
+	// ---------- COMPONENT MASKS -----------
+	std::unordered_map<std::type_index, const scBitMask64> _componentMasks = std::unordered_map<std::type_index, const scBitMask64>({
+		{ typeid(CInput),			0x0000000000000001 },
+		{ typeid(CPosition),		0x0000000000000002 },
+		{ typeid(CTransform),		0x0000000000000004 },
+		{ typeid(CStatic),			0x0000000000000008 },
+		{ typeid(CSprite),			0x0000000000000010 },
+		{ typeid(CAnimation),		0x0000000000000020 },
+		{ typeid(CBoundingBox),		0x0000000000000040 },
+	});
 
 };
 

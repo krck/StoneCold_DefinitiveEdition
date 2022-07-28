@@ -53,18 +53,44 @@ void GamePlayScene::HandleInput(sf::WindowBase*) {
 }
  
 void GamePlayScene::Update(scUint32 frameTime) {
-	SystemUpdateTransformation(frameTime);
-	SystemUpdateAnimation(frameTime);
+	// Add a simple form of numerical integration (Explicit Euler) to speeds at different FPSs
+	// (Explicit Euler works well as long as the speeds is constant or the frameTime is low)
+	const float deltaSec = frameTime / 1000.0f;
 	
+	// Transform Player based on Input
+	SystemUpdatePlayerTransformation(_ePlayer, deltaSec);
+
+	// Update all Animations
+	const scBitMask64 animationMask = (_ecm.GetComponentMask<CSprite>() | _ecm.GetComponentMask<CAnimation>());
+	auto animationSprites = _ecm.GetEntitiesByComponents(animationMask);
+	for (const auto& entityId : animationSprites) {
+		SystemUpdateAnimation(entityId);
+	}
+
 	//_systemCollisionDetection->Update(frameTime);
-	//_systemCollisionResolution->Update(frameTime);
+	//_systemCollisionResolution->Update(frameTime); 
 }
 
 void GamePlayScene::Render() {
+	// Get the camera bounds to draw only Sprites that are in the current view
+	const auto& camCenter = _camera.getCenter();
+	const auto& camSize = _camera.getSize();
+	const auto cameraRect = sf::FloatRect(sf::Vector2f(camCenter.x - (camSize.x / 2.f), camCenter.y - (camSize.y / 2.f)), camSize);
+
 	// First: Render all static sprites (MapTiles)
-	SystemRenderStaticSprites();
+	const scBitMask64 staticMask = (_ecm.GetComponentMask<CSprite>() | _ecm.GetComponentMask<CStatic>());
+	auto staticSprites = _ecm.GetEntitiesByComponents(staticMask);
+	for (const auto& entityId : staticSprites) {
+		SystemRenderStaticSprites(entityId, cameraRect);
+	}
+	
 	// Second: Render all moving sprites (Player, NPCs, ...)
-	SystemRenderMotionSprites();
+	const scBitMask64 motionMask = (_ecm.GetComponentMask<CSprite>() | _ecm.GetComponentMask<CTransform>());
+	auto motionSprites = _ecm.GetEntitiesByComponents(motionMask);
+	for (const auto& entityId : motionSprites) {
+		SystemRenderMotionSprites(entityId, cameraRect);
+	}
+
 	// Third: Render the GUI (always top Layer)
 	// ...
 
@@ -153,67 +179,45 @@ void GamePlayScene::SystemInputAnimation() {
 }
 
 // Update system logic
-void GamePlayScene::SystemUpdateTransformation(scUint32 frameTime) {
-	/*
-	auto& inputComponents = *_ecs.GetComponentArray<CInput>();
-	auto& transformComponents = *_ecs.GetComponentArray<CTransform>();
-	auto& positionComponents = *_ecs.GetComponentArray<CPosition>();
+void GamePlayScene::SystemUpdatePlayerTransformation(const scEntityId& entityId, float deltaSec) {
+	auto& i = _ecm.GetComponent<CInput>(entityId);
+	auto& t = _ecm.GetComponent<CTransform>(entityId);
+	auto& p = _ecm.GetComponent<CPosition>(entityId);
 
-	// Add a simple form of numerical integration (Explicit Euler) to speeds at different FPSs
-	// (Explicit Euler works well as long as the speeds is constant or the frameTime is low)
-	const float deltaSec = frameTime / 1000.0f;
+	// For each keykeyStates contains a value of 1 if pressed and a value of 0 if not pressed
+	// Add negative and positive velocity so the sprite doesn't move if both are pressed at the same time
+	sf::Vector2f tmpVelocity;
+	tmpVelocity.x = ((-1.0f * i.ActionStart("ACTN_LEFT")) + i.ActionStart("ACTN_RIGHT"));
+	tmpVelocity.y = ((-1.0f * i.ActionStart("ACTN_UP")) + i.ActionStart("ACTN_DOWN"));
 
-	for (const auto& entityId : _entities) {
-		auto& i = inputComponents[entityId];
-		auto& t = transformComponents[entityId];
-		auto& p = positionComponents[entityId];
+	// Normalize the velocity in case of diagonal movement
+	// FIND SOME WAY TO DO THIS WITHOUT IF TO NOT DISTURB THE CACHE, OUR LORD AND SAVIOR
+	if (tmpVelocity.x != 0 || tmpVelocity.y != 0)
+		tmpVelocity = tmpVelocity.normalized();
 
-		// For each keykeyStates contains a value of 1 if pressed and a value of 0 if not pressed
-		// Add negative and positive velocity so the sprite doesn't move if both are pressed at the same time
-		sf::Vector2f tmpVelocity;
-		tmpVelocity.x = ((-1.0f * i.ActionStart("ACTN_LEFT")) + i.ActionStart("ACTN_RIGHT"));
-		tmpVelocity.y = ((-1.0f * i.ActionStart("ACTN_UP")) + i.ActionStart("ACTN_DOWN"));
-
-		// Normalize the velocity in case of diagonal movement
-		// FIND SOME WAY TO DO THIS WITHOUT IF TO NOT DISTURB THE CACHE, OUR LORD AND SAVIOR
-		if (tmpVelocity.x != 0 || tmpVelocity.y != 0)
-			tmpVelocity = tmpVelocity.normalized();
-
-		t.Velocity.x = (tmpVelocity.x * t.Speed) * deltaSec;
-		t.Velocity.y = (tmpVelocity.y * t.Speed) * deltaSec;
-		p.PositionAbsPrevious = p.PositionAbs;
-		p.PositionAbs += t.Velocity;
-	}
-	*/
+	t.Velocity.x = (tmpVelocity.x * t.Speed) * deltaSec;
+	t.Velocity.y = (tmpVelocity.y * t.Speed) * deltaSec;
+	p.PositionAbsPrevious = p.PositionAbs;
+	p.PositionAbs += t.Velocity;
 }
 
 // Update system logic
-void GamePlayScene::SystemUpdateAnimation(scUint32) {
-	/*
-	auto& spriteComponents = *_ecs.GetComponentArray<CSprite>();
-	auto& animationComponents = *_ecs.GetComponentArray<CAnimation>();
+void GamePlayScene::SystemUpdateAnimation(const scEntityId& entityId) {
+	auto& s = _ecm.GetComponent<CSprite>(entityId);
+	auto& a = _ecm.GetComponent<CAnimation>(entityId);
 
-	scUint16 aFrame;
-	AssetAnimation* currentAnimation;
+	// Increment the global frame count
+	a.CurrentFrame++;
 
-	for (const auto& entityId : _entities) {
-		auto& s = spriteComponents[entityId];
-		auto& a = animationComponents[entityId];
+	// Get the current Animation ptr and calculate the animation-frame that should be displayed
+	// 				CurrentFrame (global frame count)
+	// "divided by" FrameSpeed (how many frames should a animation image be displayed?)
+	// "modulo" 	FrameCount (how many frames does the current animation have?)
+	AssetAnimation* currentAnimation = &(*a.Animations)[a.CurrentAnimation];
+	const scUint16 aFrame = (a.CurrentFrame / currentAnimation->FrameSpeed) % currentAnimation->FrameCount;
 
-		// Increment the global frame count
-		a.CurrentFrame++;
-
-		// Get the current Animation ptr and calculate the animation-frame that should be displayed
-		// 				CurrentFrame (global frame count)
-		// "divided by" FrameSpeed (how many frames should a animation image be displayed?)
-		// "modulo" 	FrameCount (how many frames does the current animation have?)
-		currentAnimation = &(*a.Animations)[a.CurrentAnimation];
-		aFrame = (a.CurrentFrame / currentAnimation->FrameSpeed) % currentAnimation->FrameCount;
-
-		// Update the Sprite Rect that will be rendered, based on the "current Frame" (X-Offset), the "current Animation" (Y-Offset) and the FrameSize
-		s.TextureRect = sf::IntRect(sf::Vector2i(aFrame * a.AnimationFrameSize.x, currentAnimation->Y_Offset), a.AnimationFrameSize);
-	}
-	*/
+	// Update the Sprite Rect that will be rendered, based on the "current Frame" (X-Offset), the "current Animation" (Y-Offset) and the FrameSize
+	s.TextureRect = sf::IntRect(sf::Vector2i(aFrame * a.AnimationFrameSize.x, currentAnimation->Y_Offset), a.AnimationFrameSize);
 }
 
 // Update system logic
@@ -262,65 +266,40 @@ void GamePlayScene::SystemUpdateCollisionResolution(scUint32) {
 }
 
 // Render system logic
-void GamePlayScene::SystemRenderStaticSprites() {
-	/*
-	// Get the camera bounds to draw only Sprites that are in the current view
-	const auto& camCenter = _camera.getCenter();
-	const auto& camSize = _camera.getSize();
-	const auto cameraRect = sf::FloatRect(sf::Vector2f(camCenter.x - (camSize.x / 2.f), camCenter.y - (camSize.y / 2.f)), camSize);
+void GamePlayScene::SystemRenderStaticSprites(const scEntityId& entityId, const sf::FloatRect& cameraRect) {
+	// Get the Sprite and Static component
+	auto& cSprite = _ecm.GetComponent<CSprite>(entityId);
+	//auto& cStatic = _ecm.GetComponent<CStatic>(entityId);
 
-	std::vector<scEntityId> staticSprites;
-	staticSprites.reserve(10);
-	staticSprites.push_back(_eMapBackground);
-
-	for (const auto& entityId : staticSprites) {
-		auto& cSprite = _ecm.GetComponent<CSprite>(entityId);
-		// auto& cStatic = _ecm.GetComponent<CStatic>(entityId);
-		// auto& cPosition = _ecm.GetComponent<CPosition>(entityId);
-
-		// Draw Sprite if visible, based on the lastet transformation
-		if(cameraRect.findIntersection(cSprite.Sprite->getGlobalBounds())) {
-			cSprite.Sprite->setTextureRect(cSprite.TextureRect);
-			_renderWindow->draw(*cSprite.Sprite);
-		}
+	// Draw Sprite if visible, based on the lastet transformation
+	if(cameraRect.findIntersection(cSprite.Sprite->getGlobalBounds())) {
+		cSprite.Sprite->setTextureRect(cSprite.TextureRect);
+		_renderWindow->draw(*cSprite.Sprite);
 	}
-	*/
 }
 
 // Render system logic
-void GamePlayScene::SystemRenderMotionSprites() {
-	/*
-	// Get the camera bounds to draw only Sprites that are in the current view
-	const auto& camCenter = _camera.getCenter();
-	const auto& camSize = _camera.getSize();
-	const auto cameraRect = sf::FloatRect(sf::Vector2f(camCenter.x - (camSize.x / 2.f), camCenter.y - (camSize.y / 2.f)), camSize);
+void GamePlayScene::SystemRenderMotionSprites(const scEntityId& entityId, const sf::FloatRect& cameraRect) {
+	// Get the Sprite and Transform component
+	auto& s = _ecm.GetComponent<CSprite>(entityId);
+	auto& t = _ecm.GetComponent<CTransform>(entityId);
 
-	auto& spriteComponents = *_ecs.GetComponentArray<CSprite>();
-	auto& transformComponents = *_ecs.GetComponentArray<CTransform>();
+	// Transform the Sprite
+	s.Sprite->setScale(sf::Vector2f(t.Scale, t.Scale));
+	s.Sprite->move(t.Velocity);
 
-	for (const auto& entityId : _entities) {
-		auto& s = spriteComponents[entityId];
-		auto& t = transformComponents[entityId];
-
-		// Transform the Sprite
-		s.Sprite->setScale(sf::Vector2f(t.Scale, t.Scale));
-		s.Sprite->move(t.Velocity);
-
-		// Draw Sprite if visible, based on the lastet transformation
-		if(cameraRect.findIntersection(s.Sprite->getGlobalBounds())) {
-			// Flip the Sprit, in case of movement direction change (left/rigt)
-			// (This is done by simply flipping the "width" part of the current TextureRect)
-			s.FlipSprite = (t.Velocity.x == 0 ? s.FlipSprite : (t.Velocity.x < 0 ? -1.f : 1.f));
-			s.TextureRect = (s.FlipSprite < 0
-							? sf::IntRect(sf::Vector2i(s.TextureRect.left + s.TextureRect.width, s.TextureRect.top), sf::Vector2i(s.TextureRect.width * -1.f, s.TextureRect.height))
-							: sf::IntRect(sf::Vector2i(s.TextureRect.left, s.TextureRect.top), sf::Vector2i(s.TextureRect.width, s.TextureRect.height))
-			);
-			s.Sprite->setTextureRect(s.TextureRect);
-			renderTarget->draw(*s.Sprite);
-			drawCount++;
-		}
+	// Draw Sprite if visible, based on the lastet transformation
+	if(cameraRect.findIntersection(s.Sprite->getGlobalBounds())) {
+		// Flip the Sprit, in case of movement direction change (left/rigt)
+		// (This is done by simply flipping the "width" part of the current TextureRect)
+		s.FlipSprite = (t.Velocity.x == 0 ? s.FlipSprite : (t.Velocity.x < 0 ? -1.f : 1.f));
+		s.TextureRect = (s.FlipSprite < 0
+						? sf::IntRect(sf::Vector2i(s.TextureRect.left + s.TextureRect.width, s.TextureRect.top), sf::Vector2i(s.TextureRect.width * -1.f, s.TextureRect.height))
+						: sf::IntRect(sf::Vector2i(s.TextureRect.left, s.TextureRect.top), sf::Vector2i(s.TextureRect.width, s.TextureRect.height))
+		);
+		s.Sprite->setTextureRect(s.TextureRect);
+		_renderWindow->draw(*s.Sprite);
 	}
-	*/
 }
 
 // Render system logic
@@ -353,7 +332,6 @@ void GamePlayScene::SystemRenderDebugOutput() {
 }
 
 void GamePlayScene::SpawnPlayer() {
-	/*
 	auto playerPosition = _spawnPoint;
 	auto playerSpeed = 250.f;
 
@@ -368,18 +346,16 @@ void GamePlayScene::SpawnPlayer() {
 	const auto aabb = (sf::Vector2f(14.f, 18.f) * playerSpriteAsset->GetScale());
 	const auto aabbHalf = (sf::Vector2f(7.f, 9.f) * playerSpriteAsset->GetScale());
 
-	_player = _ecs.CreateEntity();
-	_ecs.AddComponent<CInput>(_player, {});
-	_ecs.AddComponent<CAnimation>(_player, { playerAnimations, playerSpriteAsset->GetFrameSize(), defaultAnimation, defaultAnimation, 0, 0, 0 });
-	_ecs.AddComponent<CPosition>(_player, { playerPosition, playerPosition });
-	_ecs.AddComponent<CTransform>(_player, { sf::Vector2f(), playerSpeed, 0.f, playerSpriteAsset->GetScale() });
-	_ecs.AddComponent<CSprite>(_player, { playerSprite, sf::IntRect(sf::Vector2i(0, 0), playerSpriteAsset->GetFrameSize()), sf::Color::White, 1.f });
-	_ecs.AddComponent<CBoundingBox>(_player, { _player, aabb, aabbHalf, sf::Vector2f(), true });
-	*/
+	_ePlayer = _ecm.AddEntity("player");
+	_ecm.AddComponent<CInput>(_ePlayer, {});
+	_ecm.AddComponent<CAnimation>(_ePlayer, { playerAnimations, playerSpriteAsset->GetFrameSize(), defaultAnimation, defaultAnimation, 0, 0, 0 });
+	_ecm.AddComponent<CPosition>(_ePlayer, { playerPosition, playerPosition });
+	_ecm.AddComponent<CTransform>(_ePlayer, { sf::Vector2f(), playerSpeed, 0.f, playerSpriteAsset->GetScale() });
+	_ecm.AddComponent<CSprite>(_ePlayer, { playerSprite, sf::IntRect(sf::Vector2i(0, 0), playerSpriteAsset->GetFrameSize()), sf::Color::White, 1.f });
+	_ecm.AddComponent<CBoundingBox>(_ePlayer, { _ePlayer, aabb, aabbHalf, sf::Vector2f(), true });
 }
 
 void GamePlayScene::SpawnEnemies() {
-	/*
 	auto enemyPosition = sf::Vector2f(800.f, 800.f);
 
 	_assetManager.AddSpriteAnimated("Sprite_Skeleton_1", "Sprite_Skeleton");
@@ -389,23 +365,21 @@ void GamePlayScene::SpawnEnemies() {
 	auto skeletonSprite = skeletonSpriteAsset->GetSprite();
 	skeletonSprite->move(enemyPosition);
 
-	auto enemy = _ecs.CreateEntity();
-	_ecs.AddComponent<CAnimation>(enemy, { skeletonAnimations, skeletonSpriteAsset->GetFrameSize(), defaultAnimation, defaultAnimation, 0, 0, 0 });
-	_ecs.AddComponent<CPosition>(enemy, { enemyPosition, enemyPosition });
-	_ecs.AddComponent<CTransform>(enemy, { sf::Vector2f(), 200.f, 0.f, skeletonSpriteAsset->GetScale() });
-	_ecs.AddComponent<CSprite>(enemy, { skeletonSprite, sf::IntRect(sf::Vector2i(0, 0), skeletonSpriteAsset->GetFrameSize()), sf::Color::White, 1.f });
-	*/
+	auto enemy = _ecm.AddEntity("Enemy");
+	_ecm.AddComponent<CAnimation>(enemy, { skeletonAnimations, skeletonSpriteAsset->GetFrameSize(), defaultAnimation, defaultAnimation, 0, 0, 0 });
+	_ecm.AddComponent<CPosition>(enemy, { enemyPosition, enemyPosition });
+	_ecm.AddComponent<CTransform>(enemy, { sf::Vector2f(), 200.f, 0.f, skeletonSpriteAsset->GetScale() });
+	_ecm.AddComponent<CSprite>(enemy, { skeletonSprite, sf::IntRect(sf::Vector2i(0, 0), skeletonSpriteAsset->GetFrameSize()), sf::Color::White, 1.f });
 }
 
 void GamePlayScene::CreateLevelMap(LevelType levelType) {
-	/*
 	scUint64 mapSize = 60;
 	auto mapTileScale = 6.0f;
 	auto textureFrameWidth = 32.0f;
 
 	// RNG generate a new Tile Map
 	_currentMapTiles = _mapManager.GenerateMap(levelType, sf::Vector2i(mapSize, mapSize));
-	auto tile = _ecs.CreateEntity();
+	auto tile = _ecm.AddEntity("Map");
 
 	// Create a singular Texture, where all the Map Tiles will be drawn to
 	// (Then, when rendering the game the wohle map is only one entity ... not 5.000 or even more)
@@ -437,9 +411,9 @@ void GamePlayScene::CreateLevelMap(LevelType levelType) {
 
 			// Add the CollisionComponent in case its a Wall-Tile
 			if(static_cast<int>(_currentMapTiles->TileGrid[row][column]) > static_cast<int>(MapTileType::Floor_Shadow)) {
-				auto tileCollision = _ecs.CreateEntity();
-				_ecs.AddComponent<CPosition>(tileCollision, { tilePosition, tilePosition });
-				_ecs.AddComponent<CBoundingBox>(tileCollision, { tile, sf::Vector2f(tileWidth, tileHeight), sf::Vector2f(tileWidth / 2.f, tileHeight / 2.f), sf::Vector2f(), false });
+				auto tileCollision = _ecm.AddEntity("MapTile");
+				_ecm.AddComponent<CPosition>(tileCollision, { tilePosition, tilePosition });
+				_ecm.AddComponent<CBoundingBox>(tileCollision, { tile, sf::Vector2f(tileWidth, tileHeight), sf::Vector2f(tileWidth / 2.f, tileHeight / 2.f), sf::Vector2f(), false });
 			}
 
 			if(_currentMapTiles->TileGrid[row][column] == MapTileType::Portal)
@@ -454,8 +428,7 @@ void GamePlayScene::CreateLevelMap(LevelType levelType) {
 	auto renderRect = sf::IntRect(sf::Vector2i(), sf::Vector2i(textureSize, textureSize));
 
 	// Add the Tile to the ECS
-	_ecs.AddComponent<CStatic>(tile, { 0.f, 1.f });
-	_ecs.AddComponent<CPosition>(tile, { sf::Vector2f(), sf::Vector2f() });
-	_ecs.AddComponent<CSprite>(tile, { fullMapSprite->GetSprite(), renderRect, sf::Color::White, 1.f });
-	*/
+	_ecm.AddComponent<CStatic>(tile, { 0.f, 1.f });
+	_ecm.AddComponent<CPosition>(tile, { sf::Vector2f(), sf::Vector2f() });
+	_ecm.AddComponent<CSprite>(tile, { fullMapSprite->GetSprite(), renderRect, sf::Color::White, 1.f });
 }
