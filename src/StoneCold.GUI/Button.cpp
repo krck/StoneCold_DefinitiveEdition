@@ -2,7 +2,7 @@
 #include "Button.hpp"
 
 using namespace StoneCold::GUI;
-using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 Button::Button(scSptr<sf::Sprite> sprite, const sf::Font& font, scUint16 textSize, const sf::String& text) 
     : Widget(), _sprite(sprite), _text(sf::Text()), _pressed(false) {
@@ -15,9 +15,9 @@ Button::Button(scSptr<sf::Sprite> sprite, const sf::Font& font, scUint16 textSiz
 
 void Button::CenterText(scInt16 offsetX, scInt16 offsetY) {
     const auto textSize = _text.getLocalBounds();
-    const auto buttonPos = GetPosition();
+    const auto buttonPos = GetGlobalPosition();
     _text.setOrigin(sf::Vector2f(textSize.left + std::round(textSize.width / 2.f), textSize.top + std::round(textSize.height / 2.f)));
-    _text.setPosition(sf::Vector2f(buttonPos.x + offsetX, buttonPos.y + offsetY));
+    _text.setPosition(sf::Vector2f(buttonPos.left + std::round(buttonPos.width / 2.f) + offsetX, buttonPos.top + std::round(buttonPos.height / 2.f) + offsetY));
 }
 
 void Button::Render(sf::RenderTarget* renderTarget) {

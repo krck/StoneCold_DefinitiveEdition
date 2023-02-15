@@ -14,8 +14,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/x64/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/x64/bin)
 
 # Configure a header file to pass some of the CMake settings to the source code
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/StoneCold.Core/ApplicationConfig.hpp.in 
-               ${CMAKE_CURRENT_SOURCE_DIR}/src/StoneCold.Core/ApplicationConfig.hpp)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/StoneCold.Common/ApplicationConfig.hpp.in 
+               ${CMAKE_CURRENT_SOURCE_DIR}/src/StoneCold.Common/ApplicationConfig.hpp)
 
 # Add the SFML Multimedia Library
 add_subdirectory(external/sfml)
@@ -35,6 +35,7 @@ target_include_directories(${PROJECT_NAME}  PUBLIC external/sfml/include
                                             PUBLIC external/nlohmann_json
                                             PUBLIC external/SSARCandy_ini
                                             PUBLIC src/StoneCold.Assets
+                                            PUBLIC src/StoneCold.Common
                                             PUBLIC src/StoneCold.Core
                                             PUBLIC src/StoneCold.ECS
                                             PUBLIC src/StoneCold.GUI

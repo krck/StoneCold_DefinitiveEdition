@@ -3,7 +3,6 @@
         "name": "StoneCold Game",
         "width": 1600,
         "height": 1200,
-        "style": "Resize",
         "vSync": false,
         "maxFps": 60,
         "pixelDepth": 32
@@ -98,7 +97,7 @@
         { "id": 82,     "enumName": "Keyboard_Numpad7",     "action": "" },
         { "id": 83,     "enumName": "Keyboard_Numpad8",     "action": "" },
         { "id": 84,     "enumName": "Keyboard_Numpad9",     "action": "" },
-        { "id": 85,     "enumName": "Keyboard_F1",          "action": "" },
+        { "id": 85,     "enumName": "Keyboard_F1",          "action": "DEBUG_MODE" },
         { "id": 86,     "enumName": "Keyboard_F2",          "action": "" },
         { "id": 87,     "enumName": "Keyboard_F3",          "action": "" },
         { "id": 88,     "enumName": "Keyboard_F4",          "action": "" },
@@ -117,6 +116,9 @@
 
         { "id": 200,    "enumName": "Mouse_Left",           "action": "ACTN_ACTION_PRIMARY" },
         { "id": 201,    "enumName": "Mouse_Right",          "action": "ACTN_ACTION_SECONDARY" },
-        { "id": 202,    "enumName": "Mouse_Moved",          "action": "ACTN_CURSOR_MOVE" }
+        { "id": 202,    "enumName": "Mouse_Moved",          "action": "ACTN_CURSOR_MOVE" },
+        { "id": 203,    "enumName": "Mouse_ScrolledUp",     "action": "ZOOM_OUT" },
+        { "id": 204,    "enumName": "Mouse_ScrolledDown",   "action": "ZOOM_IN" }
+
     ]
 }

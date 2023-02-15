@@ -14,6 +14,7 @@
 namespace StoneCold::Core {
 
 using namespace StoneCold::Assets;
+using namespace StoneCold::Common;
 
 class SfmlManager {
 public:
@@ -23,13 +24,11 @@ public:
 
 	bool Initialize(const AssetManager& assets);
 	inline sf::RenderWindow* GetWindow() { return _window.get(); }
-	inline sf::View* GetPlayerView() { return _playerView.get(); }
 
 	~SfmlManager() = default;
 
 private:
 	std::unique_ptr<sf::RenderWindow> _window;
-	std::unique_ptr<sf::View> _playerView; // Acts like the Camera that follows the player
 };
 
 }

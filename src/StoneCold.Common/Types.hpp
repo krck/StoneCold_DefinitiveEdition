@@ -1,6 +1,6 @@
 
-#ifndef STONECOLD_CORE_TYPES_H
-#define STONECOLD_CORE_TYPES_H
+#ifndef STONECOLD_COMMON_TYPES_H
+#define STONECOLD_COMMON_TYPES_H
 
 #include <memory>
 #include <cstdint>
@@ -10,7 +10,7 @@
 // Macro to get the name of a variable
 #define GET_VARIABLE_NAME(Variable) (#Variable)
 
-namespace StoneCold::Core {
+namespace StoneCold::Common {
 
 // StoneCold signed integer typedefs (fastest option, with a width of at least (!) 8, 16, 32 and 64 bits) 
 using scInt8 = std::int_fast8_t;

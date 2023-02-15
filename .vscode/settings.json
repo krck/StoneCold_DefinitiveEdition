@@ -87,6 +87,7 @@
         "ranges": "cpp",
         "span": "cpp",
         "valarray": "cpp",
-        "*.in": "cpp"
+        "*.in": "cpp",
+        "*.rh": "cpp"
     }
 }

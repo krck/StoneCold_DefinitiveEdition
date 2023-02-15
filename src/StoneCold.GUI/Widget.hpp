@@ -9,7 +9,7 @@
 
 namespace StoneCold::GUI {
 
-using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 class Widget {
 public:

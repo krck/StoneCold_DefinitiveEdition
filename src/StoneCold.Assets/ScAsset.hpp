@@ -8,7 +8,7 @@
 
 namespace StoneCold::Assets {
 
-using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 class ScAsset {
 public:

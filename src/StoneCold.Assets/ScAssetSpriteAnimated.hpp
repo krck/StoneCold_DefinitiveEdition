@@ -10,7 +10,7 @@
 
 namespace StoneCold::Assets {
 
-using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 //
 // Simple Sturct to hold the singular Animation data (idle, walk, attack, dead, etc.)
@@ -28,14 +28,12 @@ struct AssetAnimation {
 class ScAssetSpriteAnimated : public ScAsset {
 public:
     ScAssetSpriteAnimated(const std::string& name, const sf::Texture& texture, const std::vector<AssetAnimation>& animations, 
-                          const std::string& defaultAnimation, const sf::Vector2i& frameSize) 
-                        : ScAsset(name), _frameSize(frameSize), _defaultAnimation(defaultAnimation) {
+                          const std::string& defaultAnimation, const sf::Vector2i& frameSize, float scale) 
+                        : ScAsset(name), _frameSize(frameSize), _scale(scale), _defaultAnimation(defaultAnimation) {
         // Create and configure the 2D Sprite
         _sprite = std::make_shared<sf::Sprite>();
         _sprite->setTexture(texture);
         _sprite->setTextureRect(sf::IntRect(sf::Vector2i(0, 0), _frameSize));
-        // Set every Sprite "Origin" to the Center of the Rect
-        _sprite->setOrigin({ _sprite->getLocalBounds().width / 2.f, _sprite->getLocalBounds().height / 2.f });
 
         // Transform the AssetAnimation data into a lookup map, by name
         std::unordered_map<std::string, AssetAnimation> animationMap;
@@ -48,6 +46,7 @@ public:
     // Hand out Sprite as shared_ptr for ease of use
     inline scSptr<sf::Sprite> GetSprite() { return _sprite; }
     inline sf::Vector2i GetFrameSize() const { return _frameSize; }
+    inline float GetScale() const { return _scale; }
 
     inline scSptr<std::unordered_map<std::string, AssetAnimation>> GetAnimations() const { return _animations; }
     inline std::string GetDefaultAnimation() const { return _defaultAnimation; }
@@ -55,6 +54,7 @@ public:
 private:
     scSptr<sf::Sprite> _sprite;
     const sf::Vector2i _frameSize;
+    const float _scale;
     // Animation data
     scSptr<std::unordered_map<std::string, AssetAnimation>> _animations;
     const std::string _defaultAnimation;

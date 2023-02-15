@@ -1,8 +1,8 @@
 
-#ifndef STONECOLD_CORE_ENUMS_H
-#define STONECOLD_CORE_ENUMS_H
+#ifndef STONECOLD_COMMON_ENUMS_H
+#define STONECOLD_COMMON_ENUMS_H
 
-namespace StoneCold::Core {
+namespace StoneCold::Common {
 
 enum class SceneType {
 	None,
@@ -196,6 +196,8 @@ enum ActionMap {
 	Mouse_Left = 200,
 	Mouse_Right = 201,
 	Mouse_Moved = 202,
+	Mouse_ScrolledUp = 203,
+	Mouse_ScrolledDown = 204,
 };
 
 }

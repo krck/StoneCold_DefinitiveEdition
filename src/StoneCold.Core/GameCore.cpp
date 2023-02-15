@@ -2,6 +2,7 @@
 #include "GameCore.hpp"
 
 using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 using namespace StoneCold::Assets;
 using namespace StoneCold::Scenes;
 
@@ -26,7 +27,6 @@ bool GameCore::Initialize() {
 		if(_assetManager.Initialize(_basePath) && _sfml.Initialize(_assetManager)) {
 			// Set the now active render window
 			_window = _sfml.GetWindow();
-			_playerCamera = _sfml.GetPlayerView();
 
 			// Read the ActionMap Settings, used by the Scenes as Input mapping, from the json
 			for(const auto& item : _assetManager.GetSettingsJson()["actionMap"].items()) {
@@ -38,8 +38,8 @@ bool GameCore::Initialize() {
 				}
 			};
 
-			AddScene(SceneType::MainMenu, std::make_shared<MainMenuScene>(10, _assetManager));
-			AddScene(SceneType::GamePlay, std::make_shared<GamePlayScene>(20000, _assetManager));
+			AddScene(SceneType::MainMenu, std::make_shared<MainMenuScene>(10, _assetManager, _window));
+			AddScene(SceneType::GamePlay, std::make_shared<GamePlayScene>(20000, _assetManager, _window));
 			SetSceneActive(SceneType::MainMenu);
 
 			return true;
@@ -59,12 +59,12 @@ int GameCore::Run() {
 	try {
 		sf::Clock clock; // Starts the clock
 		sf::Event event;
+		bool windowHasFocus = true;
 
 		// FPS calculation variables
-		bool showFPS = true;
 		scInt32 frameTime = 0; // delta in ms
 		scInt64 frameCount = 0;
-		const scUint8 frameCountMax = 40;
+		const scUint8 frameCountMax = 60;
 		auto frameTimes = std::array<scUint32, frameCountMax>();
 		float averageFPS = 0.f;
 
@@ -82,16 +82,10 @@ int GameCore::Run() {
 						_activeScene->Stop();
 					}
 				}
+				// On focus changes, set a bool to stop the Input/Update/Render cycle
+				else if (event.type == sf::Event::LostFocus) { windowHasFocus = false; }
+				else if (event.type == sf::Event::GainedFocus) { windowHasFocus = true; }
 
-				else if (event.type == sf::Event::Resized) { /* Resize from user changes to the window, or from setting it in code */}
-				else if (event.type == sf::Event::LostFocus) { /* _engine.pause(); */ }
-				else if (event.type == sf::Event::GainedFocus) { /* _engine.resume(); */ }			
-				else if (event.type == sf::Event::TextEntered) {
-					// TextEntered differs from KeyPressed Events, as it contains a "full" user input if possible
-					// Example: Pressing '^' then 'e' on a French keyboard will produce two KeyPressed events, but a single TextEntered 'ê' character
-					// Use TextEntered in Textboxes (whenever a user has to enter actual Text)
-				}
-				
 				// Check if "Start" or "End" action (based on Pressed/Released) and send the Action to the Scene
 				// (Keycode mappings between any Keyboard Action and sf::Keyboard use the same IDs, so event.key.code can be used 1:1)
 				else if(event.type == sf::Event::KeyPressed && _actionMap.find((ActionMap)event.key.code) != _actionMap.end()) {
@@ -116,37 +110,50 @@ int GameCore::Run() {
 				else if (event.type == sf::Event::MouseMoved && _actionMap.find(ActionMap::Mouse_Moved) != _actionMap.end()) {
 					_activeScene->RegisterAction(SceneAction(ActionMap::Mouse_Moved, ActionType::Start, _actionMap[ActionMap::Mouse_Moved]));
 				}
+				else if (event.type == sf::Event::MouseWheelScrolled && event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
+				{
+					if(event.mouseWheelScroll.delta < 0 && _actionMap.find(ActionMap::Mouse_ScrolledUp) != _actionMap.end())
+						_activeScene->RegisterAction(SceneAction(ActionMap::Mouse_ScrolledUp, ActionType::Start, _actionMap[ActionMap::Mouse_ScrolledUp]));
+					if(event.mouseWheelScroll.delta > 0 && _actionMap.find(ActionMap::Mouse_ScrolledDown) != _actionMap.end())
+						_activeScene->RegisterAction(SceneAction(ActionMap::Mouse_ScrolledDown, ActionType::Start, _actionMap[ActionMap::Mouse_ScrolledDown]));						
+				}
+				// Other Input Events
+				else if (event.type == sf::Event::TextEntered) {
+					// TextEntered differs from KeyPressed Events, as it contains a "full" user input if possible
+					// Example: Pressing '^' then 'e' on a French keyboard will produce two KeyPressed events, but a single TextEntered 'ê' character
+					// Use TextEntered in Textboxes (whenever a user has to enter actual Text)
+				}
+
+				// Finally, pass the event to the current Scene in case it has some specific logic (example: Resize)
+				_activeScene->HandleEvent(event);
 			}
 
 			// Core functions (currentScene should never be null)
 			// Reset screen, Handle input, Update entities, Render and display
-        	_window->clear(sf::Color::Black);
-			_activeScene->HandleInput(_window);
-			_activeScene->Update(frameTime); 
-			_activeScene->Render(_window, _playerCamera);
-        	_window->display();
+			if(windowHasFocus) {
+				// Engine Input/Update/Render cycle
+				_window->clear(sf::Color::Black);
+				_activeScene->HandleInput(_window);
+				_activeScene->Update(frameTime); 
+				_activeScene->Render();
+				_window->display();
 
-			// -------------------------------------------------------------------------
-			// Toggle FPS output when F1 is pressed
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::F1))
-				showFPS = !showFPS;
-
-			// FPS counter (average)
-			frameTimes[frameCount++] = frameTime;
-			if (frameCount == frameCountMax) {
-				frameCount = 0;
-				averageFPS = 0.f;
-				if (showFPS) {
+				// -------------------------------------------------------------------------
+				// FPS counter (average)
+				frameTimes[frameCount++] = frameTime;
+				if (frameCount == frameCountMax) {
+					frameCount = 0;
+					averageFPS = 0.f;
 					// In case it should be visible: Calculate and print the average FPS
 					for (size_t i = 0; i < frameCountMax; i++) {
 						averageFPS += frameTimes[i];
 					}
 
 					averageFPS = 1000.f / (averageFPS / frameCountMax);
-					std::cout << "FPS: " << averageFPS << "\n";
+					std::cout << "FPS: " << (scUint16)averageFPS << "\n";
 				}
+				// -------------------------------------------------------------------------
 			}
-			// -------------------------------------------------------------------------
 		}
 		_window->close();
 

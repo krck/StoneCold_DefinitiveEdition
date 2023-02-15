@@ -16,6 +16,7 @@
 
 namespace StoneCold::Core {
 
+using namespace StoneCold::Common;
 using namespace StoneCold::Assets;
 using namespace StoneCold::Scenes;
 
@@ -57,7 +58,6 @@ private:
 	bool _globalEXIT;
 	std::string _basePath;
 	sf::RenderWindow* _window;
-	sf::View* _playerCamera;
 	// Managers
 	SfmlManager _sfml;
 	AssetManager _assetManager;

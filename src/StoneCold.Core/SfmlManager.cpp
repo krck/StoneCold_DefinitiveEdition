@@ -2,6 +2,7 @@
 #include "SfmlManager.hpp"
 
 using namespace StoneCold::Core;
+using namespace StoneCold::Common;
 
 //
 // Initializes the SFML Ressources and 
@@ -14,15 +15,13 @@ bool SfmlManager::Initialize(const AssetManager& assets) {
 		const auto windowName = 	settings["window"]["name"].get<std::string>() ;
 		const auto windowWidth = 	settings["window"]["width"].get<int>();
 		const auto windowHeight = 	settings["window"]["height"].get<int>();
-		const auto windowStyle =	(settings["window"]["style"].get<std::string>() == "Resize" ? sf::Style::Resize : sf::Style::Default);
 		const auto vSyncEnabled = 	settings["window"]["vSync"].get<bool>();
 		const auto maxFPS = 		settings["window"]["maxFps"].get<int>();
 		const auto pixelDepth = 	settings["window"]["pixelDepth"].get<int>();
 
 		// Create the Window and the main View
 		auto windowNameFull = (windowName + " - v" + StoneCold_VERSION_MAJOR + "." + StoneCold_VERSION_MINOR);
-		_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(sf::Vector2u(windowWidth, windowHeight), pixelDepth), windowNameFull, windowStyle);
-		_playerView = std::make_unique<sf::View>(sf::FloatRect(sf::Vector2f(0.f, 0.f), sf::Vector2f((float)windowWidth, (float)windowHeight)));
+		_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(sf::Vector2u(windowWidth, windowHeight), pixelDepth), windowNameFull, sf::Style::Default);
 		_window->setActive(true);
 
 		// Set Framerate OR VSync (They do not go well together. Is one or the other)
