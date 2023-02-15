@@ -1,0 +1,15 @@
+
+#ifndef STONECOLD_COMMON_APPLICATIONCONFIG_H
+#define STONECOLD_COMMON_APPLICATIONCONFIG_H
+
+#include <string>
+
+namespace StoneCold::Common {
+
+// the configured options and settings for Tutorial
+static const std::string StoneCold_VERSION_MAJOR = "@StoneCold_VERSION_MAJOR@";
+static const std::string StoneCold_VERSION_MINOR = "@StoneCold_VERSION_MINOR@";
+
+}
+
+#endif

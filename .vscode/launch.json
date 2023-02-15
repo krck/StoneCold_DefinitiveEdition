@@ -5,7 +5,7 @@
         "name": "DEBUG (gdb) launch",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}\\build\\Debug\\x64\\bin\\stone_cold.exe",
+        "program": "${workspaceFolder}\\build\\Debug\\x64\\bin\\StoneCold.exe",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",

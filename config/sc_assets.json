@@ -1,0 +1,12 @@
+{
+    "textures": [
+        { "name": "Texture_Player", "type": "Player", "path": "\\player\\Dwarf_Sprite.png" },
+        { "name": "Texture_Skeleton", "type": "Monster", "path": "\\monsters\\Skeleton.png" },
+        { "name": "Texture_Grassland", "type": "Map", "path": "\\map\\grasslands.png" },
+        { "name": "Texture_GuiButton", "type": "Gui", "path": "\\ui\\gui_button.png" }
+    ],
+    "fonts": [
+        { "name": "Font_Crom", "path": "\\fonts\\Crom.ttf" },
+        { "name": "Font_OldeDethek", "path": "\\fonts\\OldeDethek.ttf" }
+    ]
+}
