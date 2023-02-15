@@ -13,7 +13,7 @@ StoneCold (2D Game and Engine)
 
 # 1. About
 
-Another one. Lost count of all the 2D/3D SDL2, SFML or "pure" OpenGL based Game and Engine Projects i started. But maybe this one is different ... may this one gets finished. lol.
+...
 
 <a name="gdd"/>
 
@@ -21,7 +21,7 @@ Another one. Lost count of all the 2D/3D SDL2, SFML or "pure" OpenGL based Game 
 
 ### 2.1 Project Description
  
-StoneCold will be a Buzzword hell. Its a 2D, top-down, rouge-like, tile-based, bullet-hell RPG and comes with its own SFML based Engine. The concept is heavily inspired by games like Vampire Survivors (Gameplay), Diablo 2 (RPG Elements), Nuclear Throne (Map generation) and many more.
+StoneCold will be a 2D, top-down, rouge-like, tile-based, bullet-hell RPG and comes with its own SFML based Engine. The concept is heavily inspired by games like Vampire Survivors (Gameplay), Diablo 2 (RPG Elements), Nuclear Throne (Map generation) and many more.
 
 ### 2.2 Story, Characters and Theme
 
